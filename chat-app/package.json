@@ -2,6 +2,7 @@
   "name": "chat-app",
   "private": true,
   "version": "0.1.0",
+  "homepage": "https://artteeth.github.io/Abyss-Front-Controller/",
   "type": "module",
   "scripts": {
     "dev": "vite",

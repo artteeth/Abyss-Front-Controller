@@ -30,11 +30,6 @@ jobs:
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-<<<<<<< HEAD
           branch: gh-pages
           folder: ./chat-app/dist
           clean: true
-=======
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./chat-app/dist
->>>>>>> 103103ac24685dae2cda90b3849f30fe455eb4ed

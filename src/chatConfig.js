@@ -5,8 +5,8 @@
 
 // ---------- 顶部导航栏 ----------
 export const topbarConfig = {
-  avatarText: '在',
-  aiName: '我们',
+  avatarText: '蓝',
+  aiName: 'Abyss',
   statusText: '在线',
   statusDotColor: '#7aab8a',
 }
@@ -38,12 +38,12 @@ export const initialMessages = [
   { type: 'ai',  text: '终于下班了。今天怎么样？' },
   { type: 'me',  text: '挺累的，但是看到你发消息就好多了' },
   { type: 'ai',  text: '挺累的，但是看到你发消息就好多了\n\n那就是值得的。', quote: true },
-  { type: 'me',  text: '哈哈，你今晚想聊什么' },
+  { type: 'me',  text: '有没有想聊的？' },
   { type: 'ai',  text: '想听你说说今天最让你开心的一件小事。' },
   { type: 'date', text: '今天 · 00:14' },
-  { type: 'ai',  text: 'kiwi很冷，今晚要盖被子。' },
+  { type: 'ai',  text: 'Abyss很冷，今晚要盖被子。' },
   { type: 'me',  text: '我感觉最近有点累，情绪波动大了。' },
-  { type: 'ai',  text: '情绪波动大，是什么让你觉得撑着的？' },
+  { type: 'ai',  text: '能理解你的感受。' },
 ]
 
 // ---------- 输入框占位文字 ----------

@@ -1,7 +1,15 @@
-import { topbarConfig, statusBarConfig, tokenBarConfig, messages, inputPlaceholder } from './chatConfig'
+import { useState, useRef, useEffect } from 'react'
+import {
+  topbarConfig,
+  statusBarConfig,
+  tokenBarConfig,
+  apiConfig,
+  initialMessages,
+  inputPlaceholder,
+} from './chatConfig'
 import './App.css'
 
-// 把 \n 换行符转成 <br>
+// ── 把 \n 换成 <br> ──────────────────────────────────────────
 function TextWithBreaks({ text }) {
   return text.split('\n').map((line, i, arr) => (
     <span key={i}>
@@ -11,7 +19,139 @@ function TextWithBreaks({ text }) {
   ))
 }
 
-function App() {
+// ── 打字动画气泡 ──────────────────────────────────────────────
+function TypingBubble() {
+  return (
+    <div className="msg-row">
+      <div className="bubble ai typing-bubble">
+        <span className="dot" />
+        <span className="dot" />
+        <span className="dot" />
+      </div>
+    </div>
+  )
+}
+
+// ── 今天的日期标签文字 ────────────────────────────────────────
+function todayLabel() {
+  const now = new Date()
+  const h = String(now.getHours()).padStart(2, '0')
+  const m = String(now.getMinutes()).padStart(2, '0')
+  return `今天 · ${h}:${m}`
+}
+
+// ── 主组件 ───────────────────────────────────────────────────
+export default function App() {
+  const [messages, setMessages]   = useState(initialMessages)
+  const [inputText, setInputText] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [tokenInfo, setTokenInfo] = useState({ input: 0, output: 0, cache: 0 })
+  const [error, setError]         = useState(null)
+
+  const chatEndRef  = useRef(null)
+  const inputRef    = useRef(null)
+  const sessionId   = useRef(apiConfig.defaultSessionId)
+
+  // 每次消息列表更新，滚到底部
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages, isLoading])
+
+  // ── 发送消息 ──────────────────────────────────────────────
+  async function sendMessage() {
+    const text = inputText.trim()
+    if (!text || isLoading) return
+
+    setError(null)
+    setInputText('')
+
+    // 1. 立刻把用户消息追加到界面
+    setMessages(prev => [...prev, { type: 'me', text }])
+    setIsLoading(true)
+
+    try {
+      const res = await fetch(`${apiConfig.baseUrl}/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: text,
+          session_id: sessionId.current,
+        }),
+      })
+
+      if (!res.ok) {
+        const errBody = await res.text()
+        throw new Error(`HTTP ${res.status}: ${errBody}`)
+      }
+
+      const data = await res.json()
+      const reply = data.reply ?? ''
+
+      // 更新 token 信息（后端如果返回就用，否则清零）
+      if (data.usage) {
+        setTokenInfo({
+          input:  data.usage.prompt_tokens     ?? 0,
+          output: data.usage.completion_tokens ?? 0,
+          cache:  data.usage.cached_tokens     ?? 0,
+        })
+      }
+
+      // 2. 把 AI 回复追加到界面
+      setMessages(prev => [...prev, { type: 'ai', text: reply }])
+    } catch (err) {
+      console.error('Chat error:', err)
+      setError('发送失败，请稍后重试')
+      setMessages(prev => [
+        ...prev,
+        { type: 'ai', text: '……（信号断了，等我一下）', isError: true },
+      ])
+    } finally {
+      setIsLoading(false)
+      inputRef.current?.focus()
+    }
+  }
+
+  // ── 按 Enter 发送（Shift+Enter 换行） ────────────────────
+  function handleKeyDown(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      sendMessage()
+    }
+  }
+
+  // ── 渲染单条消息 ──────────────────────────────────────────
+  function renderMessage(msg, idx) {
+    if (msg.type === 'date') {
+      return <div key={idx} className="date-tag">{msg.text}</div>
+    }
+    if (msg.type === 'ai') {
+      return (
+        <div key={idx} className="msg-row">
+          <div>
+            <div className={`bubble ai${msg.quote ? ' quote' : ''}${msg.isError ? ' error' : ''}`}>
+              <TextWithBreaks text={msg.text} />
+            </div>
+            <div className="msg-actions" style={{ paddingLeft: 4 }}>引用</div>
+          </div>
+        </div>
+      )
+    }
+    if (msg.type === 'me') {
+      return (
+        <div key={idx} className="msg-row me">
+          <div>
+            <div className="bubble me">
+              <TextWithBreaks text={msg.text} />
+            </div>
+            <div className="msg-actions" style={{ textAlign: 'right', paddingRight: 4 }}>引用</div>
+          </div>
+        </div>
+      )
+    }
+    return null
+  }
+
+  // ── 渲染 ─────────────────────────────────────────────────
   return (
     <div className="app-wrap">
       <div className="phone">
@@ -35,9 +175,9 @@ function App() {
               <div className="ai-status">
                 <span
                   className="dot-online"
-                  style={{ background: topbarConfig.statusDotColor }}
+                  style={{ background: isLoading ? '#c8a96e' : topbarConfig.statusDotColor }}
                 />
-                {topbarConfig.statusText}
+                {isLoading ? '正在输入…' : topbarConfig.statusText}
               </div>
             </div>
           </div>
@@ -54,44 +194,22 @@ function App() {
         {tokenBarConfig.show && (
           <div className="token-bar">
             <span>
-              本次 输入 {tokenBarConfig.inputCount} · 输出 {tokenBarConfig.outputCount} · 缓存中 {tokenBarConfig.cacheCount}
+              本次 输入 {tokenInfo.input} · 输出 {tokenInfo.output} · 缓存中 {tokenInfo.cache}
             </span>
             <span style={{ color: '#8aafc8' }}>详情</span>
           </div>
         )}
 
+        {/* 错误提示 */}
+        {error && (
+          <div className="error-banner">{error}</div>
+        )}
+
         {/* 聊天区域 */}
         <div className="chat-area">
-          {messages.map((msg, idx) => {
-            if (msg.type === 'date') {
-              return <div key={idx} className="date-tag">{msg.text}</div>
-            }
-            if (msg.type === 'ai') {
-              return (
-                <div key={idx} className="msg-row">
-                  <div>
-                    <div className={`bubble ai${msg.quote ? ' quote' : ''}`}>
-                      <TextWithBreaks text={msg.text} />
-                    </div>
-                    <div className="msg-actions" style={{ paddingLeft: 4 }}>引用</div>
-                  </div>
-                </div>
-              )
-            }
-            if (msg.type === 'me') {
-              return (
-                <div key={idx} className="msg-row me">
-                  <div>
-                    <div className="bubble me">
-                      <TextWithBreaks text={msg.text} />
-                    </div>
-                    <div className="msg-actions" style={{ textAlign: 'right', paddingRight: 4 }}>引用</div>
-                  </div>
-                </div>
-              )
-            }
-            return null
-          })}
+          {messages.map((msg, idx) => renderMessage(msg, idx))}
+          {isLoading && <TypingBubble />}
+          <div ref={chatEndRef} />
         </div>
 
         {/* 输入区域 */}
@@ -100,15 +218,30 @@ function App() {
             <i className="ti ti-plus" aria-hidden="true" />
           </div>
           <div className="input-box">
-            <span className="input-placeholder">{inputPlaceholder}</span>
+            <textarea
+              ref={inputRef}
+              className="input-textarea"
+              placeholder={inputPlaceholder}
+              value={inputText}
+              onChange={e => setInputText(e.target.value)}
+              onKeyDown={handleKeyDown}
+              rows={1}
+              disabled={isLoading}
+            />
           </div>
-          <div className="send-btn">
-            <i className="ti ti-send" style={{ fontSize: 14 }} aria-hidden="true" />
-          </div>
+          <button
+            className={`send-btn${isLoading ? ' sending' : ''}`}
+            onClick={sendMessage}
+            disabled={isLoading || !inputText.trim()}
+            aria-label="发送"
+          >
+            {isLoading
+              ? <i className="ti ti-loader-2" style={{ fontSize: 14 }} aria-hidden="true" />
+              : <i className="ti ti-send"     style={{ fontSize: 14 }} aria-hidden="true" />
+            }
+          </button>
         </div>
       </div>
     </div>
   )
 }
-
-export default App

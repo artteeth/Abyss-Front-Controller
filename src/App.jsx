@@ -50,7 +50,32 @@ export default function App() {
 
   const chatEndRef  = useRef(null)
   const inputRef    = useRef(null)
-  const sessionId   = useRef(apiConfig.defaultSessionId)
+  const sessionId   = useRef(null)  // null = 尚未初始化
+
+  // ── 启动时自动创建会话 ────────────────────────────────────
+  useEffect(() => {
+    async function initSession() {
+      // 优先复用 localStorage 里上次的 session_id
+      const saved = localStorage.getItem('abyss_session_id')
+      if (saved) {
+        sessionId.current = Number(saved)
+        return
+      }
+      try {
+        const res = await fetch(`${apiConfig.baseUrl}/sessions`, {
+          method: 'POST',
+        })
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        const data = await res.json()
+        sessionId.current = data.session_id
+        localStorage.setItem('abyss_session_id', String(data.session_id))
+      } catch (err) {
+        console.error('Session init failed:', err)
+        setError('无法连接服务器，请刷新重试')
+      }
+    }
+    initSession()
+  }, [])
 
   // 每次消息列表更新，滚到底部
   useEffect(() => {
@@ -60,7 +85,7 @@ export default function App() {
   // ── 发送消息 ──────────────────────────────────────────────
   async function sendMessage() {
     const text = inputText.trim()
-    if (!text || isLoading) return
+    if (!text || isLoading || sessionId.current === null) return
 
     setError(null)
     setInputText('')

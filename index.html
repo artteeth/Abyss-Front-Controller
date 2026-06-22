@@ -6,98 +6,127 @@
 <title>Abyss</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: #e8e6e0; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 40px 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #e8e6e0; display: flex; justify-content: center; min-height: 100vh; padding: 40px 0; font-family: 'Noto Sans SC', sans-serif; }
+.phone { width: 340px; height: 780px; background: #f5f4f0; border-radius: 36px; border: 1.5px solid #dddbd5; overflow: hidden; display: flex; flex-direction: column; position: relative; box-shadow: 0 8px 40px rgba(0,0,0,0.10); }
+.paper-noise { position: absolute; inset: 0; pointer-events: none; opacity: 0.15; z-index: 0; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E"); }
 
-  .phone { width: 340px; min-height: 680px; height: 780px; background: #f5f4f0; border-radius: 36px; border: 1.5px solid #dddbd5; overflow: hidden; display: flex; flex-direction: column; position: relative; font-family: 'Noto Sans SC', sans-serif; box-shadow: 0 8px 40px rgba(0,0,0,0.10); }
-  .paper-noise { position: absolute; inset: 0; pointer-events: none; opacity: 0.15; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E"); z-index: 0; }
+/* 状态栏 */
+.status-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px 4px; font-size: 11px; color: #9a9890; position: relative; z-index: 1; }
+.battery-wrap { display: flex; gap: 5px; align-items: center; }
 
-  .status-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px 4px; font-size: 11px; color: #9a9890; position: relative; z-index: 1; }
-  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px 10px; border-bottom: 0.5px solid #dddbd5; background: #f5f4f0; position: relative; z-index: 1; }
-  .topbar-left { display: flex; align-items: center; gap: 10px; }
-  .avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #b8cfe8, #8aafc8); display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 500; color: #2e5070; border: 1px solid #c8daea; flex-shrink: 0; }
-  .ai-name { font-size: 14px; font-weight: 500; color: #3a3830; font-family: 'Noto Serif SC', serif; }
-  .ai-status { font-size: 11px; color: #9a9890; display: flex; align-items: center; gap: 4px; }
-  .dot-online { width: 6px; height: 6px; border-radius: 50%; background: #7aab8a; display: inline-block; transition: background 0.3s; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-  .topbar-icons { display: flex; gap: 14px; color: #8a8880; align-items: center; }
+/* 顶栏 */
+.topbar { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px 10px; border-bottom: 0.5px solid #dddbd5; background: #f5f4f0; position: relative; z-index: 1; }
+.topbar-left { display: flex; align-items: center; gap: 10px; }
+.avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg,#b8cfe8,#8aafc8); display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 500; color: #2e5070; border: 1px solid #c8daea; flex-shrink: 0; }
+.ai-name { font-size: 14px; font-weight: 500; color: #3a3830; font-family: 'Noto Serif SC', serif; }
+.ai-status { font-size: 11px; color: #9a9890; display: flex; align-items: center; gap: 4px; }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: #7aab8a; display: inline-block; transition: background 0.3s; }
+.dot.thinking { background: #c8a86a; animation: pulse 1s infinite; }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+.topbar-icons { display: flex; gap: 14px; align-items: center; }
+.icon-btn { background: none; border: none; cursor: pointer; display: flex; align-items: center; padding: 0; }
 
-  .token-bar { background: #eeecea; border-bottom: 0.5px solid #dddbd5; padding: 4px 16px; font-size: 10px; color: #aaa89e; display: flex; justify-content: space-between; position: relative; z-index: 1; }
-  .token-bar span:last-child { color: #8aafc8; cursor: pointer; }
+/* token 栏 */
+.token-bar { background: #eeecea; border-bottom: 0.5px solid #dddbd5; padding: 4px 16px; font-size: 10px; color: #aaa89e; display: flex; justify-content: space-between; position: relative; z-index: 1; }
+.token-bar a { color: #8aafc8; text-decoration: none; }
 
-  .chat-area { flex: 1; overflow-y: auto; padding: 16px 14px; display: flex; flex-direction: column; gap: 12px; background: transparent; position: relative; z-index: 1; scroll-behavior: smooth; }
-  .chat-area::-webkit-scrollbar { width: 3px; }
-  .chat-area::-webkit-scrollbar-thumb { background: #d0cdc6; border-radius: 2px; }
+/* 聊天区 */
+.chat-area { flex: 1; overflow-y: auto; padding: 16px 14px; display: flex; flex-direction: column; gap: 12px; position: relative; z-index: 1; scroll-behavior: smooth; }
+.chat-area::-webkit-scrollbar { width: 3px; }
+.chat-area::-webkit-scrollbar-thumb { background: #d0cdc6; border-radius: 2px; }
 
-  .date-tag { text-align: center; font-size: 11px; color: #b0ada5; margin: 2px 0; }
+.date-tag { text-align: center; font-size: 11px; color: #b0ada5; margin: 4px 0; user-select: none; }
 
-  .msg-row { display: flex; align-items: flex-end; animation: fadeUp 0.25s ease; }
-  .msg-row.me { flex-direction: row-reverse; }
-  @keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+.msg-row { display: flex; align-items: flex-end; animation: fadeUp 0.22s ease; }
+.msg-row.me { flex-direction: row-reverse; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)} }
 
-  .bubble { max-width: 240px; padding: 10px 14px; font-size: 13.5px; line-height: 1.65; color: #3a3830; word-break: break-word; white-space: pre-wrap; }
-  .bubble.ai { background: #fff; border: 0.5px solid #dddbd5; border-radius: 18px 18px 18px 4px; }
-  .bubble.me { background: #c8d8ea; border: 0.5px solid #b0c8de; border-radius: 18px 18px 4px 18px; color: #1e3a50; }
+.bubble { max-width: 240px; padding: 10px 14px; font-size: 13.5px; line-height: 1.65; color: #3a3830; word-break: break-word; }
+.bubble.ai { background: #fff; border: 0.5px solid #dddbd5; border-radius: 18px 18px 18px 4px; }
+.bubble.me { background: #c8d8ea; border: 0.5px solid #b0c8de; border-radius: 18px 18px 4px 18px; color: #1e3a50; }
+.bubble.ai.quote { border-left: 2.5px solid #8aafc8; padding-left: 12px; background: #f0eee9; border-radius: 4px 14px 14px 4px; }
+.msg-actions { font-size: 10px; color: #b0ada5; }
+.msg-actions.left { padding-left: 4px; }
+.msg-actions.right { text-align: right; padding-right: 4px; }
 
-  .msg-actions { font-size: 10px; color: #b0ada5; }
-  .msg-actions.left { padding-left: 4px; }
-  .msg-actions.right { text-align: right; padding-right: 4px; }
+/* 打字动画 */
+.typing-bubble { background: #fff; border: 0.5px solid #dddbd5; border-radius: 18px 18px 18px 4px; padding: 12px 16px; display: flex; gap: 5px; align-items: center; }
+.typing-bubble span { width: 6px; height: 6px; border-radius: 50%; background: #b0c8de; display: inline-block; animation: bounce 1.2s infinite; }
+.typing-bubble span:nth-child(2){animation-delay:.2s}
+.typing-bubble span:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
 
-  .typing-bubble { background: #fff; border: 0.5px solid #dddbd5; border-radius: 18px 18px 18px 4px; padding: 12px 16px; display: flex; gap: 5px; align-items: center; }
-  .typing-bubble span { width: 6px; height: 6px; border-radius: 50%; background: #b0c8de; display: inline-block; animation: bounce 1.2s infinite; }
-  .typing-bubble span:nth-child(2) { animation-delay: 0.2s; }
-  .typing-bubble span:nth-child(3) { animation-delay: 0.4s; }
-  @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
-
-  .input-area { padding: 10px 14px 24px; background: #f5f4f0; border-top: 0.5px solid #dddbd5; display: flex; align-items: flex-end; gap: 10px; position: relative; z-index: 1; }
-  .plus-btn { width: 32px; height: 32px; border-radius: 50%; background: none; border: 0.5px solid #c8c5be; display: flex; align-items: center; justify-content: center; color: #8a8880; flex-shrink: 0; cursor: pointer; }
-  .input-box { flex: 1; background: #eeece8; border: 0.5px solid #d8d5ce; border-radius: 18px; padding: 8px 14px; font-size: 13px; color: #3a3830; font-family: 'Noto Sans SC', sans-serif; min-height: 36px; max-height: 100px; resize: none; outline: none; line-height: 1.5; overflow-y: auto; }
-  .input-box::placeholder { color: #b0ada5; }
-  .input-box:focus { border-color: #b0c8de; }
-  .send-btn { width: 32px; height: 32px; border-radius: 50%; background: #8aafc8; display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; border: none; transition: background 0.2s; }
-  .send-btn:hover { background: #7a9fba; }
-  .send-btn:disabled { background: #c8c5be; cursor: not-allowed; }
+/* 输入区 */
+.input-area { padding: 10px 14px 24px; background: #f5f4f0; border-top: 0.5px solid #dddbd5; display: flex; align-items: flex-end; gap: 10px; position: relative; z-index: 1; }
+.plus-btn { width: 32px; height: 32px; border-radius: 50%; background: none; border: 0.5px solid #c8c5be; display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; }
+.input-box { flex: 1; background: #eeece8; border: 0.5px solid #d8d5ce; border-radius: 18px; padding: 8px 14px; font-size: 13px; color: #3a3830; font-family: 'Noto Sans SC', sans-serif; min-height: 36px; max-height: 100px; resize: none; outline: none; line-height: 1.5; overflow-y: auto; }
+.input-box::placeholder { color: #b0ada5; }
+.input-box:focus { border-color: #b0c8de; }
+.send-btn { width: 32px; height: 32px; border-radius: 50%; background: #8aafc8; display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; border: none; transition: background 0.2s; }
+.send-btn:hover { background: #7a9fba; }
+.send-btn:disabled { background: #c8c5be; cursor: not-allowed; }
 </style>
 </head>
 <body>
 <div class="phone">
   <div class="paper-noise"></div>
 
+  <!-- 状态栏 -->
   <div class="status-bar">
     <span id="timeDisplay">--</span>
-    <span style="display:flex;gap:5px;align-items:center;">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9a9890" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1" fill="#9a9890"/></svg>
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9a9890" stroke-width="2"><rect x="2" y="7" width="18" height="11" rx="2"/><path d="M22 11v4"/></svg>
-    </span>
+    <div class="battery-wrap">
+      <svg id="wifiIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9a9890" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1" fill="#9a9890"/></svg>
+      <!-- 电池图标：动态填充 -->
+      <svg id="batteryIcon" width="22" height="13" viewBox="0 0 22 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0.5" y="0.5" width="18" height="12" rx="2" stroke="#9a9890" stroke-width="1"/>
+        <path d="M19.5 4v5" stroke="#9a9890" stroke-width="1.5" stroke-linecap="round"/>
+        <rect id="batteryFill" x="2" y="2" width="14" height="9" rx="1" fill="#9a9890"/>
+      </svg>
+      <span id="batteryPct" style="font-size:10px;color:#9a9890;">--</span>
+    </div>
   </div>
 
+  <!-- 顶栏 -->
   <div class="topbar">
     <div class="topbar-left">
       <div class="avatar">在</div>
       <div>
-        <div class="ai-name">Abyss</div>
+        <div class="ai-name">我们</div>
         <div class="ai-status">
-          <span class="dot-online" id="statusDot"></span>
+          <span class="dot" id="statusDot"></span>
           <span id="statusText">在线</span>
         </div>
       </div>
     </div>
     <div class="topbar-icons">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a8880" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-      <svg width="17" height="17" viewBox="0 0 16 16" fill="none"><path d="M8 1 L9.1 6.3 L14.5 8 L9.1 9.7 L8 15 L6.9 9.7 L1.5 8 L6.9 6.3 Z" stroke="#8a8880" stroke-width="1.2" stroke-linejoin="round" fill="none"/></svg>
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#8a8880" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      <!-- 书签 -->
+      <button class="icon-btn" title="书签">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a8880" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+      </button>
+      <!-- 四角星（记忆） -->
+      <button class="icon-btn" title="记忆" onclick="location.href='/memory'">
+        <svg width="17" height="17" viewBox="0 0 16 16" fill="none">
+          <path d="M8 1 L9.1 6.3 L14.5 8 L9.1 9.7 L8 15 L6.9 9.7 L1.5 8 L6.9 6.3 Z" stroke="#8a8880" stroke-width="1.2" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </button>
+      <!-- 宫格 -->
+      <button class="icon-btn" title="菜单">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#8a8880" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      </button>
     </div>
   </div>
 
+  <!-- token 栏 -->
   <div class="token-bar">
     <span id="tokenInfo">本次 输入 0 · 输出 0</span>
-    <span>详情</span>
+    <a href="/memory">详情</a>
   </div>
 
-  <div class="chat-area" id="chatArea">
-    <div class="date-tag" id="todayTag">--</div>
-  </div>
+  <!-- 聊天区 -->
+  <div class="chat-area" id="chatArea"></div>
 
+  <!-- 输入区 -->
   <div class="input-area">
     <div class="plus-btn">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8a8880" stroke-width="1.8" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -110,169 +139,175 @@
 </div>
 
 <script>
-  const API_BASE = 'https://abyss-backend-sqb2.onrender.com';
+// ===== 工具函数 =====
+function fmtTime(ts) {
+  const d = new Date(ts);
+  const h = String(d.getHours()).padStart(2,'0');
+  const m = String(d.getMinutes()).padStart(2,'0');
+  return `${h}:${m}`;
+}
+function fmtDate(ts) {
+  const d = new Date(ts);
+  const now = new Date();
+  const isToday = d.toDateString() === now.toDateString();
+  const mo = d.getMonth()+1, day = d.getDate();
+  const period = d.getHours()<6?'深夜':d.getHours()<12?'上午':d.getHours()<18?'下午':'晚上';
+  return isToday ? `今天 · ${fmtTime(ts)}` : `${mo}月${day}日 · ${fmtTime(ts)}`;
+}
 
-  // ── 时间显示 ──────────────────────────────────────────────
-  function updateTime() {
-    const now = new Date();
-    const h = now.getHours();
-    const mo = now.getMonth() + 1;
-    const d = now.getDate();
-    const period = h < 6 ? '深夜' : h < 12 ? '上午' : h < 18 ? '下午' : '晚上';
-    document.getElementById('timeDisplay').textContent = `${period} · ${mo}月${d}日`;
-  }
-  updateTime();
-  setInterval(updateTime, 60000);
+// ===== 状态栏时间 =====
+function updateStatusTime() {
+  const now = new Date();
+  const h = now.getHours(), mo = now.getMonth()+1, d = now.getDate();
+  const period = h<6?'深夜':h<12?'上午':h<18?'下午':'晚上';
+  const mm = String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('timeDisplay').textContent = `${period} ${h}:${mm} · ${mo}月${d}日`;
+}
+updateStatusTime();
+setInterval(updateStatusTime, 30000);
 
-  function updateDateTag() {
-    const now = new Date();
-    const h = String(now.getHours()).padStart(2, '0');
-    const m = String(now.getMinutes()).padStart(2, '0');
-    document.getElementById('todayTag').textContent = `今天 · ${h}:${m}`;
-  }
-  updateDateTag();
-
-  // ── Session 管理 ──────────────────────────────────────────
-  let sessionId = null;
-
-  async function initSession() {
-    // 先看本地有没有保存过的 session
-    const saved = localStorage.getItem('abyss_session_id');
-    if (saved) {
-      sessionId = saved;
-      return;
+// ===== 电池同步 =====
+async function updateBattery() {
+  if (!navigator.getBattery) return;
+  try {
+    const bat = await navigator.getBattery();
+    function render() {
+      const pct = Math.round(bat.level * 100);
+      const w = Math.round((pct / 100) * 14);
+      document.getElementById('batteryFill').setAttribute('width', String(w));
+      document.getElementById('batteryPct').textContent = pct + '%';
+      const color = pct <= 20 ? '#d87060' : '#9a9890';
+      document.getElementById('batteryFill').setAttribute('fill', color);
+      document.getElementById('batteryPct').style.color = color;
     }
-    // 没有就创建新会话
-    try {
-      const res = await fetch(`${API_BASE}/sessions`, { method: 'POST' });
-      const data = await res.json();
-      sessionId = data.session_id;
-      localStorage.setItem('abyss_session_id', sessionId);
-    } catch (e) {
-      appendMessage('ai', '无法连接服务器，请刷新重试。');
-    }
+    render();
+    bat.addEventListener('levelchange', render);
+    bat.addEventListener('chargingchange', render);
+  } catch(e) {}
+}
+updateBattery();
+
+// ===== 对话历史 & 时间戳逻辑 =====
+const IDLE_MS = 10 * 60 * 1000; // 10分钟
+let history = [];       // 发给后端的 messages
+let lastMsgTime = 0;    // 上一条消息的时间戳
+let totalIn = 0, totalOut = 0;
+
+function needsDateTag(ts) {
+  if (!lastMsgTime) return true;
+  return (ts - lastMsgTime) >= IDLE_MS;
+}
+
+function appendDateTag(ts) {
+  const el = document.createElement('div');
+  el.className = 'date-tag';
+  el.textContent = fmtDate(ts);
+  document.getElementById('chatArea').appendChild(el);
+}
+
+function appendBubble(role, text, ts) {
+  const now = ts || Date.now();
+  if (needsDateTag(now)) appendDateTag(now);
+  lastMsgTime = now;
+
+  const row = document.createElement('div');
+  row.className = `msg-row${role==='user'?' me':''}`;
+  const inner = document.createElement('div');
+  const bubble = document.createElement('div');
+  bubble.className = `bubble ${role==='user'?'me':'ai'}`;
+  bubble.textContent = text;
+  const actions = document.createElement('div');
+  actions.className = `msg-actions ${role==='user'?'right':'left'}`;
+  actions.textContent = '引用';
+  inner.appendChild(bubble);
+  inner.appendChild(actions);
+  row.appendChild(inner);
+  document.getElementById('chatArea').appendChild(row);
+  document.getElementById('chatArea').scrollTop = 99999;
+}
+
+function showTyping() {
+  const row = document.createElement('div');
+  row.className = 'msg-row'; row.id = 'typingRow';
+  const tb = document.createElement('div');
+  tb.className = 'typing-bubble';
+  tb.innerHTML = '<span></span><span></span><span></span>';
+  row.appendChild(tb);
+  document.getElementById('chatArea').appendChild(row);
+  document.getElementById('chatArea').scrollTop = 99999;
+}
+function hideTyping() {
+  const el = document.getElementById('typingRow');
+  if (el) el.remove();
+}
+
+function setThinking(on) {
+  document.getElementById('statusDot').className = on ? 'dot thinking' : 'dot';
+  document.getElementById('statusText').textContent = on ? '思考中…' : '在线';
+  document.getElementById('sendBtn').disabled = on;
+}
+
+// ===== 加载历史记录 =====
+async function loadHistory() {
+  try {
+    const res = await fetch('/api/history');
+    const data = await res.json();
+    if (!data.length) return;
+    data.forEach(m => {
+      appendBubble(m.role, m.content, m.timestamp);
+      history.push({ role: m.role, content: m.content });
+    });
+    totalIn = data.filter(m=>m.role==='user').reduce((a,m)=>a+m.content.length,0);
+    totalOut = data.filter(m=>m.role==='assistant').reduce((a,m)=>a+m.content.length,0);
+    document.getElementById('tokenInfo').textContent = `累计 输入 ${totalIn} · 输出 ${totalOut}`;
+  } catch(e) {}
+}
+loadHistory();
+
+// ===== 发送消息 =====
+async function sendMessage() {
+  const input = document.getElementById('inputBox');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  input.style.height = 'auto';
+
+  const sendTime = Date.now();
+  history.push({ role: 'user', content: text });
+  appendBubble('user', text, sendTime);
+  setThinking(true);
+  showTyping();
+
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ messages: history })
+    });
+    const data = await res.json();
+    const reply = data.reply || '出了点问题，请稍后再试。';
+    const replyTime = data.timestamp || Date.now();
+    history.push({ role: 'assistant', content: reply });
+    hideTyping();
+    appendBubble('assistant', reply, replyTime);
+    totalIn += text.length;
+    totalOut += reply.length;
+    document.getElementById('tokenInfo').textContent = `累计 输入 ${totalIn} · 输出 ${totalOut}`;
+  } catch(e) {
+    hideTyping();
+    appendBubble('assistant', '网络错误，请检查后端连接。', Date.now());
   }
+  setThinking(false);
+}
 
-  // ── 渲染消息 ──────────────────────────────────────────────
-  function appendMessage(role, text) {
-    const chatArea = document.getElementById('chatArea');
-    const row = document.createElement('div');
-    row.className = `msg-row${role === 'user' ? ' me' : ''}`;
-
-    const bubble = document.createElement('div');
-    bubble.className = `bubble ${role === 'user' ? 'me' : 'ai'}`;
-    bubble.textContent = text;
-
-    const actions = document.createElement('div');
-    actions.className = `msg-actions ${role === 'user' ? 'right' : 'left'}`;
-    actions.textContent = '引用';
-
-    const wrap = document.createElement('div');
-    wrap.appendChild(bubble);
-    wrap.appendChild(actions);
-    row.appendChild(wrap);
-    chatArea.appendChild(row);
-    chatArea.scrollTop = chatArea.scrollHeight;
-  }
-
-  // ── 打字动画 ──────────────────────────────────────────────
-  function showTyping() {
-    const chatArea = document.getElementById('chatArea');
-    const row = document.createElement('div');
-    row.className = 'msg-row';
-    row.id = 'typingRow';
-    const tb = document.createElement('div');
-    tb.className = 'typing-bubble';
-    tb.innerHTML = '<span></span><span></span><span></span>';
-    row.appendChild(tb);
-    chatArea.appendChild(row);
-    chatArea.scrollTop = chatArea.scrollHeight;
-  }
-
-  function hideTyping() {
-    const el = document.getElementById('typingRow');
-    if (el) el.remove();
-  }
-
-  // ── 状态切换 ──────────────────────────────────────────────
-  function setThinking(on) {
-    const dot = document.getElementById('statusDot');
-    const txt = document.getElementById('statusText');
-    const btn = document.getElementById('sendBtn');
-    dot.style.background = on ? '#c8a86a' : '#7aab8a';
-    dot.style.animation = on ? 'pulse 1s infinite' : 'none';
-    txt.textContent = on ? '思考中…' : '在线';
-    btn.disabled = on;
-  }
-
-  // ── 发送消息 ──────────────────────────────────────────────
-  async function sendMessage() {
-    if (!sessionId) {
-      appendMessage('ai', '还在连接服务器，请稍候再试…');
-      return;
-    }
-
-    const input = document.getElementById('inputBox');
-    const text = input.value.trim();
-    if (!text) return;
-
-    input.value = '';
-    input.style.height = 'auto';
-
-    appendMessage('user', text);
-    setThinking(true);
-    showTyping();
-
-    try {
-      const res = await fetch(`${API_BASE}/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: text,
-         session_id: String(sessionId),
-        }),
-      });
-
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-      const data = await res.json();
-      const reply = data.reply || '……';
-
-      hideTyping();
-      appendMessage('ai', reply);
-
-      // 更新 token 显示
-      if (data.usage) {
-        document.getElementById('tokenInfo').textContent =
-          `本次 输入 ${data.usage.prompt_tokens ?? 0} · 输出 ${data.usage.completion_tokens ?? 0}`;
-      }
-
-    } catch (e) {
-      hideTyping();
-      appendMessage('ai', '网络错误，请检查连接后重试。');
-      console.error(e);
-    }
-
-    setThinking(false);
-  }
-
-  // ── 事件绑定 ──────────────────────────────────────────────
-  document.getElementById('sendBtn').addEventListener('click', sendMessage);
-
-  document.getElementById('inputBox').addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  });
-
-  document.getElementById('inputBox').addEventListener('input', function () {
-    this.style.height = 'auto';
-    this.style.height = Math.min(this.scrollHeight, 100) + 'px';
-  });
-
-  // ── 启动 ──────────────────────────────────────────────────
-  initSession();
+document.getElementById('sendBtn').addEventListener('click', sendMessage);
+document.getElementById('inputBox').addEventListener('keydown', e => {
+  if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+});
+document.getElementById('inputBox').addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 100)+'px';
+});
 </script>
 </body>
 </html>

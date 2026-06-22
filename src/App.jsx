@@ -281,7 +281,7 @@ export default function App() {
         {/* 聊天区域 */}
         <div className="chat-area">
           {messages.map((msg, idx) => renderMessage(msg, idx))}
-          {(isLoading || isTyping) && <TypingBubble />}   {/* ✏️ 改成两个状态任一为 true 都显示 */}
+          {(isLoading || isTyping) && <TypingBubble />}
           <div ref={chatEndRef} />
         </div>
 

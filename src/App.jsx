@@ -91,7 +91,7 @@ export default function App() {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, isLoading, isTyping])  // 多加一个 isTyping 依赖
 
-  // 🆕 ── 逐条播放 segments ─────────────────────────────────
+  // ── 逐条播放 segments ─────────────────────────────────
   // 返回一个 Promise，全部播完才 resolve
   function playSegments(segments) {
     return new Promise(resolve => {
@@ -161,7 +161,7 @@ export default function App() {
         })
       }
 
-      // ✏️ ── 关键改动：用 segments 逐条播放 ───────────────
+      //  ── 关键改动：用 segments 逐条播放 ───────────────
       if (Array.isArray(data.segments) && data.segments.length > 0) {
         await playSegments(data.segments)
       } else {
@@ -228,7 +228,7 @@ export default function App() {
       <div className="phone">
         <div className="paper-noise" />
 
-        {/* 状态栏 */}
+      
         <div className="status-bar">
           <span>{statusBarConfig.timeText}</span>
           <span style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
@@ -237,7 +237,7 @@ export default function App() {
           </span>
         </div>
 
-        {/* 顶部导航栏 */}
+       
         <div className="topbar">
           <div className="topbar-left">
             <div className="avatar">{topbarConfig.avatarText}</div>
@@ -247,7 +247,7 @@ export default function App() {
                 <span
                   className="dot-online"
                   style={{
-                    background: (isLoading || isTyping) ? '#c8a96e' : topbarConfig.statusDotColor   // ✏️ 加上 isTyping
+                    background: (isLoading || isTyping) ? '#c8a96e' : topbarConfig.statusDotColor   // 加上 isTyping
                   }}
                 />
                 {(isLoading || isTyping) ? '正在输入…' : topbarConfig.statusText}
@@ -263,7 +263,7 @@ export default function App() {
           </div>
         </div>
 
-        {/* Token 信息栏 */}
+   
         {tokenBarConfig.show && (
           <div className="token-bar">
             <span>
@@ -273,19 +273,19 @@ export default function App() {
           </div>
         )}
 
-        {/* 错误提示 */}
+   
         {error && (
           <div className="error-banner">{error}</div>
         )}
 
-        {/* 聊天区域 */}
+
         <div className="chat-area">
           {messages.map((msg, idx) => renderMessage(msg, idx))}
           {(isLoading || isTyping) && <TypingBubble />}
           <div ref={chatEndRef} />
         </div>
 
-        {/* 输入区域 */}
+  
         <div className="input-area">
           <div className="plus-btn">
             <i className="ti ti-plus" aria-hidden="true" />

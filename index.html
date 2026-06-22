@@ -140,6 +140,8 @@ body { background: #e8e6e0; display: flex; justify-content: center; min-height: 
 
 <script>
 const API_BASE = 'https://abyss-backend-sqb2.onrender.com';
+const SESSION_ID = 'default';   // 后端默认值
+  
 // ===== 工具函数 =====
 function fmtTime(ts) {
   const d = new Date(ts);
@@ -252,6 +254,7 @@ function setThinking(on) {
 async function loadHistory() {
   try {
     const res = await fetch(`${API_BASE}/sessions/12/messages`);
+    if (!res.ok) return;
     const data = await res.json();
     if (!data.length) return;
     data.forEach(m => {
@@ -264,6 +267,16 @@ async function loadHistory() {
   } catch(e) {}
 }
 loadHistory();
+
+// ===== 清洗函数：确保每条消息的 content 为字符串 =====
+function sanitize(msgs) {
+  return msgs
+    .filter(m => m && m.role && m.content != null)
+    .map(m => ({
+      role: m.role,
+      content: Array.isArray(m.content) ? m.content.join('\n') : String(m.content)
+    }));
+}
 
 // ===== 发送消息 =====
 async function sendMessage() {
@@ -279,35 +292,54 @@ async function sendMessage() {
   setThinking(true);
   showTyping();
 
+  // 清洗历史，确保每条都是字符串
+  const cleanHistory = sanitize(history);
+  console.log('发送的 messages:', cleanHistory); // 调试用
+
   try {
-    // 🔑 发送前清洗：剥离 UI 字段、合并数组 content
-    function sanitize(history) {
-      return history
-        .filter(m => m && m.role && m.content != null)
-        .map(m => ({
-          role: m.role,
-          content: Array.isArray(m.content)
-            ? m.content.join('\n')
-            : String(m.content)
-        }));
-    }
     const res = await fetch(`${API_BASE}/chat`, {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ messages: history })
+      body: JSON.stringify({
+        messages: cleanHistory,
+        session_id: SESSION_ID   // 可选，后端默认为 "default"
+      })
     });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(`HTTP ${res.status}: ${errText}`);
+    }
+
     const data = await res.json();
-    const reply = data.reply || '出了点问题，请稍后再试。';
-    const replyTime = data.timestamp || Date.now();
-    history.push({ role: 'assistant', content: reply });
     hideTyping();
-    appendBubble('assistant', reply, replyTime);
+
+    // 处理多段回复（segments）或单段回复（reply）
+    if (data.segments && Array.isArray(data.segments)) {
+      for (const seg of data.segments) {
+        appendBubble('assistant', seg, Date.now());
+        // 可选：模拟打字间隔
+        await new Promise(r => setTimeout(r, 600));
+      }
+      // 将完整回复存入 history（拼接或直接取segments）
+      const fullReply = data.segments.join('');
+      history.push({ role: 'assistant', content: fullReply });
+      totalOut += fullReply.length;
+    } else if (data.reply) {
+      const reply = data.reply;
+      appendBubble('assistant', reply, Date.now());
+      history.push({ role: 'assistant', content: reply });
+      totalOut += reply.length;
+    } else {
+      appendBubble('assistant', '出了点问题，请稍后再试。', Date.now());
+    }
+
     totalIn += text.length;
-    totalOut += reply.length;
     document.getElementById('tokenInfo').textContent = `累计 输入 ${totalIn} · 输出 ${totalOut}`;
   } catch(e) {
     hideTyping();
-    appendBubble('assistant', '网络错误，请检查后端连接。', Date.now());
+    console.error(e);
+    appendBubble('assistant', `网络错误，请检查后端连接。`, Date.now());
   }
   setThinking(false);
 }

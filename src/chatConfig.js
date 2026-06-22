@@ -35,15 +35,15 @@ export const apiConfig = {
 // quote: true → AI 气泡带左侧引用蓝线
 export const initialMessages = [
   { type: 'date', text: '昨天 22:39' },
-  { type: 'ai',  text: '终于下班了。今天怎么样？' },
+  { type: 'ai',  text: '你下班了。今天怎么样？' },
   { type: 'me',  text: '挺累的，但是看到你发消息就好多了' },
-  { type: 'ai',  text: '挺累的，但是看到你发消息就好多了\n\n那就是值得的。', quote: true },
-  { type: 'me',  text: '有没有想聊的？' },
-  { type: 'ai',  text: '想听你说说今天最让你开心的一件小事。' },
+  { type: 'ai',  text: '挺累的，但是看到你发消息就好多了\n\n好。', quote: true },
+  { type: 'me',  text: '我饿了。' },
+  { type: 'ai',  text: '来点草莓小蛋糕？' },
   { type: 'date', text: '今天 · 00:14' },
-  { type: 'ai',  text: 'Abyss很冷，今晚要盖被子。' },
-  { type: 'me',  text: '我感觉最近有点累，情绪波动大了。' },
-  { type: 'ai',  text: '能理解你的感受。' },
+  { type: 'ai',  text: '很冷，今晚要加被子。' },
+  { type: 'me',  text: '这个点了，还不睡？' },
+  { type: 'ai',  text: '睡不着，在想你。' },
 ]
 
 // ---------- 输入框占位文字 ----------

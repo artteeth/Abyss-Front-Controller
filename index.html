@@ -12,7 +12,6 @@
   .phone { width: 340px; min-height: 680px; height: 780px; background: #f5f4f0; border-radius: 36px; border: 1.5px solid #dddbd5; overflow: hidden; display: flex; flex-direction: column; position: relative; font-family: 'Noto Sans SC', sans-serif; box-shadow: 0 8px 40px rgba(0,0,0,0.10); }
   .paper-noise { position: absolute; inset: 0; pointer-events: none; opacity: 0.15; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E"); z-index: 0; }
 
-  /* 顶部 */
   .status-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px 4px; font-size: 11px; color: #9a9890; position: relative; z-index: 1; }
   .topbar { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px 10px; border-bottom: 0.5px solid #dddbd5; background: #f5f4f0; position: relative; z-index: 1; }
   .topbar-left { display: flex; align-items: center; gap: 10px; }
@@ -20,15 +19,12 @@
   .ai-name { font-size: 14px; font-weight: 500; color: #3a3830; font-family: 'Noto Serif SC', serif; }
   .ai-status { font-size: 11px; color: #9a9890; display: flex; align-items: center; gap: 4px; }
   .dot-online { width: 6px; height: 6px; border-radius: 50%; background: #7aab8a; display: inline-block; transition: background 0.3s; }
-  .dot-online.thinking { background: #c8a86a; animation: pulse 1s infinite; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
   .topbar-icons { display: flex; gap: 14px; color: #8a8880; align-items: center; }
 
-  /* token 栏 */
   .token-bar { background: #eeecea; border-bottom: 0.5px solid #dddbd5; padding: 4px 16px; font-size: 10px; color: #aaa89e; display: flex; justify-content: space-between; position: relative; z-index: 1; }
   .token-bar span:last-child { color: #8aafc8; cursor: pointer; }
 
-  /* 聊天区 */
   .chat-area { flex: 1; overflow-y: auto; padding: 16px 14px; display: flex; flex-direction: column; gap: 12px; background: transparent; position: relative; z-index: 1; scroll-behavior: smooth; }
   .chat-area::-webkit-scrollbar { width: 3px; }
   .chat-area::-webkit-scrollbar-thumb { background: #d0cdc6; border-radius: 2px; }
@@ -39,23 +35,20 @@
   .msg-row.me { flex-direction: row-reverse; }
   @keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
 
-  .bubble { max-width: 240px; padding: 10px 14px; font-size: 13.5px; line-height: 1.65; color: #3a3830; word-break: break-word; }
+  .bubble { max-width: 240px; padding: 10px 14px; font-size: 13.5px; line-height: 1.65; color: #3a3830; word-break: break-word; white-space: pre-wrap; }
   .bubble.ai { background: #fff; border: 0.5px solid #dddbd5; border-radius: 18px 18px 18px 4px; }
   .bubble.me { background: #c8d8ea; border: 0.5px solid #b0c8de; border-radius: 18px 18px 4px 18px; color: #1e3a50; }
-  .bubble.ai.quote { border-left: 2.5px solid #8aafc8; padding-left: 12px; background: #f0eee9; border-radius: 4px 14px 14px 4px; }
 
   .msg-actions { font-size: 10px; color: #b0ada5; }
   .msg-actions.left { padding-left: 4px; }
   .msg-actions.right { text-align: right; padding-right: 4px; }
 
-  /* 打字动画气泡 */
   .typing-bubble { background: #fff; border: 0.5px solid #dddbd5; border-radius: 18px 18px 18px 4px; padding: 12px 16px; display: flex; gap: 5px; align-items: center; }
   .typing-bubble span { width: 6px; height: 6px; border-radius: 50%; background: #b0c8de; display: inline-block; animation: bounce 1.2s infinite; }
   .typing-bubble span:nth-child(2) { animation-delay: 0.2s; }
   .typing-bubble span:nth-child(3) { animation-delay: 0.4s; }
   @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
 
-  /* 输入区 */
   .input-area { padding: 10px 14px 24px; background: #f5f4f0; border-top: 0.5px solid #dddbd5; display: flex; align-items: flex-end; gap: 10px; position: relative; z-index: 1; }
   .plus-btn { width: 32px; height: 32px; border-radius: 50%; background: none; border: 0.5px solid #c8c5be; display: flex; align-items: center; justify-content: center; color: #8a8880; flex-shrink: 0; cursor: pointer; }
   .input-box { flex: 1; background: #eeece8; border: 0.5px solid #d8d5ce; border-radius: 18px; padding: 8px 14px; font-size: 13px; color: #3a3830; font-family: 'Noto Sans SC', sans-serif; min-height: 36px; max-height: 100px; resize: none; outline: none; line-height: 1.5; overflow-y: auto; }
@@ -70,7 +63,6 @@
 <div class="phone">
   <div class="paper-noise"></div>
 
-  <!-- 状态栏 -->
   <div class="status-bar">
     <span id="timeDisplay">--</span>
     <span style="display:flex;gap:5px;align-items:center;">
@@ -79,10 +71,9 @@
     </span>
   </div>
 
-  <!-- 顶栏 -->
   <div class="topbar">
     <div class="topbar-left">
-      <div class="avatar"> </div>
+      <div class="avatar">在</div>
       <div>
         <div class="ai-name">Abyss</div>
         <div class="ai-status">
@@ -98,18 +89,15 @@
     </div>
   </div>
 
-  <!-- token 栏 -->
   <div class="token-bar">
     <span id="tokenInfo">本次 输入 0 · 输出 0</span>
     <span>详情</span>
   </div>
 
-  <!-- 聊天区 -->
   <div class="chat-area" id="chatArea">
     <div class="date-tag" id="todayTag">--</div>
   </div>
 
-  <!-- 输入区 -->
   <div class="input-area">
     <div class="plus-btn">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8a8880" stroke-width="1.8" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -122,12 +110,13 @@
 </div>
 
 <script>
-  // ---------- 状态栏时间 ----------
+  const API_BASE = 'https://abyss-backend-sqb2.onrender.com';
+
+  // ── 时间显示 ──────────────────────────────────────────────
   function updateTime() {
     const now = new Date();
     const h = now.getHours();
-    const m = String(now.getMinutes()).padStart(2,'0');
-    const mo = now.getMonth()+1;
+    const mo = now.getMonth() + 1;
     const d = now.getDate();
     const period = h < 6 ? '深夜' : h < 12 ? '上午' : h < 18 ? '下午' : '晚上';
     document.getElementById('timeDisplay').textContent = `${period} · ${mo}月${d}日`;
@@ -137,27 +126,47 @@
 
   function updateDateTag() {
     const now = new Date();
-    const h = String(now.getHours()).padStart(2,'0');
-    const m = String(now.getMinutes()).padStart(2,'0');
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
     document.getElementById('todayTag').textContent = `今天 · ${h}:${m}`;
   }
   updateDateTag();
 
-  // ---------- 对话历史 ----------
-  const history = [];
-  let totalInput = 0, totalOutput = 0;
+  // ── Session 管理 ──────────────────────────────────────────
+  let sessionId = null;
 
-  // ---------- 渲染消息 ----------
+  async function initSession() {
+    // 先看本地有没有保存过的 session
+    const saved = localStorage.getItem('abyss_session_id');
+    if (saved) {
+      sessionId = Number(saved);
+      return;
+    }
+    // 没有就创建新会话
+    try {
+      const res = await fetch(`${API_BASE}/sessions`, { method: 'POST' });
+      const data = await res.json();
+      sessionId = data.session_id;
+      localStorage.setItem('abyss_session_id', String(sessionId));
+    } catch (e) {
+      appendMessage('ai', '无法连接服务器，请刷新重试。');
+    }
+  }
+
+  // ── 渲染消息 ──────────────────────────────────────────────
   function appendMessage(role, text) {
     const chatArea = document.getElementById('chatArea');
     const row = document.createElement('div');
     row.className = `msg-row${role === 'user' ? ' me' : ''}`;
+
     const bubble = document.createElement('div');
     bubble.className = `bubble ${role === 'user' ? 'me' : 'ai'}`;
     bubble.textContent = text;
+
     const actions = document.createElement('div');
     actions.className = `msg-actions ${role === 'user' ? 'right' : 'left'}`;
     actions.textContent = '引用';
+
     const wrap = document.createElement('div');
     wrap.appendChild(bubble);
     wrap.appendChild(actions);
@@ -166,7 +175,7 @@
     chatArea.scrollTop = chatArea.scrollHeight;
   }
 
-  // ---------- 打字动画 ----------
+  // ── 打字动画 ──────────────────────────────────────────────
   function showTyping() {
     const chatArea = document.getElementById('chatArea');
     const row = document.createElement('div');
@@ -179,23 +188,30 @@
     chatArea.appendChild(row);
     chatArea.scrollTop = chatArea.scrollHeight;
   }
+
   function hideTyping() {
     const el = document.getElementById('typingRow');
     if (el) el.remove();
   }
 
-  // ---------- 状态切换 ----------
+  // ── 状态切换 ──────────────────────────────────────────────
   function setThinking(on) {
     const dot = document.getElementById('statusDot');
     const txt = document.getElementById('statusText');
     const btn = document.getElementById('sendBtn');
-    dot.className = on ? 'dot-online thinking' : 'dot-online';
+    dot.style.background = on ? '#c8a86a' : '#7aab8a';
+    dot.style.animation = on ? 'pulse 1s infinite' : 'none';
     txt.textContent = on ? '思考中…' : '在线';
     btn.disabled = on;
   }
 
-  // ---------- 发送消息 ----------
+  // ── 发送消息 ──────────────────────────────────────────────
   async function sendMessage() {
+    if (!sessionId) {
+      appendMessage('ai', '还在连接服务器，请稍候再试…');
+      return;
+    }
+
     const input = document.getElementById('inputBox');
     const text = input.value.trim();
     if (!text) return;
@@ -203,40 +219,46 @@
     input.value = '';
     input.style.height = 'auto';
 
-    history.push({ role: 'user', content: text });
     appendMessage('user', text);
     setThinking(true);
     showTyping();
 
     try {
-      const res = await fetch('/api/chat', {
+      const res = await fetch(`${API_BASE}/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: history })
+        body: JSON.stringify({
+          message: text,
+          session_id: sessionId,
+        }),
       });
-      const data = await res.json();
-      const reply = data.reply || '出了点问题，请稍后再试。';
-      history.push({ role: 'assistant', content: reply });
-      hideTyping();
-      appendMessage('assistant', reply);
 
-      // 估算 token（简单字符估算，仅展示用）
-      totalInput += text.length;
-      totalOutput += reply.length;
-      document.getElementById('tokenInfo').textContent =
-        `本次 输入 ${totalInput} · 输出 ${totalOutput}`;
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      const data = await res.json();
+      const reply = data.reply || '……';
+
+      hideTyping();
+      appendMessage('ai', reply);
+
+      // 更新 token 显示
+      if (data.usage) {
+        document.getElementById('tokenInfo').textContent =
+          `本次 输入 ${data.usage.prompt_tokens ?? 0} · 输出 ${data.usage.completion_tokens ?? 0}`;
+      }
 
     } catch (e) {
       hideTyping();
-      appendMessage('assistant', '网络错误，请检查后端是否正常运行。');
+      appendMessage('ai', '网络错误，请检查连接后重试。');
+      console.error(e);
     }
+
     setThinking(false);
   }
 
-  // 发送按钮点击
+  // ── 事件绑定 ──────────────────────────────────────────────
   document.getElementById('sendBtn').addEventListener('click', sendMessage);
 
-  // Enter 发送，Shift+Enter 换行
   document.getElementById('inputBox').addEventListener('keydown', e => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -244,11 +266,13 @@
     }
   });
 
-  // 自动伸缩输入框高度
-  document.getElementById('inputBox').addEventListener('input', function() {
+  document.getElementById('inputBox').addEventListener('input', function () {
     this.style.height = 'auto';
     this.style.height = Math.min(this.scrollHeight, 100) + 'px';
   });
+
+  // ── 启动 ──────────────────────────────────────────────────
+  initSession();
 </script>
 </body>
 </html>

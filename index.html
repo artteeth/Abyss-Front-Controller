@@ -140,7 +140,7 @@ body { background: #e8e6e0; display: flex; justify-content: center; min-height: 
 
 <script>
 const API_BASE = 'https://abyss-backend-sqb2.onrender.com';
-const SESSION_ID = 'default';   // 后端默认值
+const SESSION_ID = 12;   // 后端默认值
   
 // ===== 工具函数 =====
 function fmtTime(ts) {
@@ -253,7 +253,7 @@ function setThinking(on) {
 // ===== 加载历史记录 =====
 async function loadHistory() {
   try {
-    const res = await fetch(`${API_BASE}/sessions/12/messages`);
+    const res = await fetch(`${API_BASE}/sessions/${SESSION_ID}/messages`);
     if (!res.ok) return;
     const data = await res.json();
     if (!data.length) return;

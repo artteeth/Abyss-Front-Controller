@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>记忆</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #e8e6e0; display: flex; justify-content: center; min-height: 100vh; padding: 40px 0; font-family: 'Noto Sans SC', sans-serif; }
+.phone { width: 340px; height: 780px; background: #f5f4f0; border-radius: 36px; border: 1.5px solid #dddbd5; overflow: hidden; display: flex; flex-direction: column; position: relative; box-shadow: 0 8px 40px rgba(0,0,0,0.10); }
+.paper-noise { position: absolute; inset: 0; pointer-events: none; opacity: 0.15; z-index: 0; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E"); }
+
+/* 顶栏 */
+.topbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 12px; border-bottom: 0.5px solid #dddbd5; background: #f5f4f0; position: relative; z-index: 1; }
+.back-btn { background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; color: #8a8880; font-size: 13px; font-family: 'Noto Sans SC', sans-serif; }
+.page-title { font-size: 15px; font-weight: 500; color: #3a3830; font-family: 'Noto Serif SC', serif; display: flex; align-items: center; gap: 6px; }
+.star-sm { display: flex; align-items: center; }
+.clear-btn { background: none; border: none; cursor: pointer; font-size: 11px; color: #b0ada5; font-family: 'Noto Sans SC', sans-serif; }
+.clear-btn:hover { color: #d87060; }
+
+/* 统计栏 */
+.stats-bar { background: #eeecea; border-bottom: 0.5px solid #dddbd5; padding: 8px 18px; display: flex; gap: 20px; position: relative; z-index: 1; }
+.stat-item { display: flex; flex-direction: column; align-items: center; }
+.stat-num { font-size: 15px; font-weight: 500; color: #3a3830; font-family: 'Noto Serif SC', serif; }
+.stat-label { font-size: 10px; color: #aaa89e; margin-top: 1px; }
+
+/* 滚动区 */
+.scroll-area { flex: 1; overflow-y: auto; padding: 16px 16px 20px; position: relative; z-index: 1; display: flex; flex-direction: column; gap: 0; }
+.scroll-area::-webkit-scrollbar { width: 3px; }
+.scroll-area::-webkit-scrollbar-thumb { background: #d0cdc6; border-radius: 2px; }
+
+/* 日期分组 */
+.day-group { margin-bottom: 18px; }
+.day-label { font-size: 11px; color: #b0ada5; text-align: center; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+.day-label::before, .day-label::after { content:''; flex:1; height:0.5px; background:#dddbd5; }
+
+/* 记忆卡片 */
+.mem-card { background: #fff; border: 0.5px solid #dddbd5; border-radius: 14px; padding: 12px 14px; margin-bottom: 8px; position: relative; overflow: hidden; transition: box-shadow 0.2s; }
+.mem-card::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; border-radius:3px 0 0 3px; }
+.mem-card.user::before { background: #8aafc8; }
+.mem-card.assistant::before { background: #a8c4a0; }
+.mem-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+.mem-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.mem-role { font-size: 10px; color: #9a9890; display: flex; align-items: center; gap: 4px; }
+.mem-role .dot-role { width: 5px; height: 5px; border-radius: 50%; display: inline-block; }
+.dot-role.user { background: #8aafc8; }
+.dot-role.ai { background: #a8c4a0; }
+.mem-time { font-size: 10px; color: #c0bdb5; }
+.mem-text { font-size: 13px; line-height: 1.6; color: #3a3830; word-break: break-word; }
+.mem-text.long { max-height: 72px; overflow: hidden; -webkit-line-clamp: 3; display: -webkit-box; -webkit-box-orient: vertical; }
+.expand-btn { font-size: 10px; color: #8aafc8; cursor: pointer; margin-top: 4px; display: inline-block; }
+
+/* 搜索框 */
+.search-wrap { padding: 10px 16px 0; position: relative; z-index: 1; }
+.search-box { width: 100%; background: #eeecea; border: 0.5px solid #d8d5ce; border-radius: 18px; padding: 7px 14px; font-size: 12px; color: #3a3830; font-family: 'Noto Sans SC', sans-serif; outline: none; }
+.search-box::placeholder { color: #b0ada5; }
+.search-box:focus { border-color: #b0c8de; }
+
+/* 空状态 */
+.empty { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; color: #c0bdb5; gap: 10px; font-size: 13px; padding-top: 60px; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="paper-noise"></div>
+
+  <!-- 顶栏 -->
+  <div class="topbar">
+    <button class="back-btn" onclick="location.href='/'">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8a8880" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      返回
+    </button>
+    <div class="page-title">
+      <span class="star-sm">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 1 L9.1 6.3 L14.5 8 L9.1 9.7 L8 15 L6.9 9.7 L1.5 8 L6.9 6.3 Z" stroke="#8aafc8" stroke-width="1.3" stroke-linejoin="round" fill="none"/></svg>
+      </span>
+      记忆
+    </div>
+    <button class="clear-btn" id="clearBtn">清空</button>
+  </div>
+
+  <!-- 统计 -->
+  <div class="stats-bar">
+    <div class="stat-item">
+      <span class="stat-num" id="statTotal">0</span>
+      <span class="stat-label">条记录</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num" id="statDays">0</span>
+      <span class="stat-label">天</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num" id="statUser">0</span>
+      <span class="stat-label">关于你的</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num" id="statAI">0</span>
+      <span class="stat-label">关于我的</span>
+    </div>
+  </div>
+
+  <!-- 搜索 -->
+  <div class="search-wrap">
+    <input class="search-box" id="searchBox" placeholder="搜索对话记录…" type="text">
+  </div>
+
+  <!-- 内容区 -->
+  <div class="scroll-area" id="scrollArea">
+    <div class="empty" id="emptyState">
+      <svg width="32" height="32" viewBox="0 0 16 16" fill="none"><path d="M8 1 L9.1 6.3 L14.5 8 L9.1 9.7 L8 15 L6.9 9.7 L1.5 8 L6.9 6.3 Z" stroke="#d0cdc6" stroke-width="1" stroke-linejoin="round" fill="none"/></svg>
+      还没有对话记录
+    </div>
+  </div>
+</div>
+
+<script>
+let allMessages = [];
+
+function fmtDate(ts) {
+  const d = new Date(ts);
+  const now = new Date();
+  if (d.toDateString()===now.toDateString()) return '今天';
+  const yesterday = new Date(now); yesterday.setDate(now.getDate()-1);
+  if (d.toDateString()===yesterday.toDateString()) return '昨天';
+  return `${d.getMonth()+1}月${d.getDate()}日`;
+}
+function fmtTime(ts) {
+  const d = new Date(ts);
+  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+function dayKey(ts) {
+  const d = new Date(ts);
+  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+}
+
+function renderMessages(msgs) {
+  const area = document.getElementById('scrollArea');
+  const empty = document.getElementById('emptyState');
+  area.innerHTML = '';
+  if (!msgs.length) { area.appendChild(empty); return; }
+
+  // 按天分组
+  const groups = {};
+  msgs.forEach(m => {
+    const k = dayKey(m.timestamp);
+    if (!groups[k]) groups[k] = { label: fmtDate(m.timestamp), items: [] };
+    groups[k].items.push(m);
+  });
+
+  Object.values(groups).forEach(g => {
+    const dayDiv = document.createElement('div');
+    dayDiv.className = 'day-group';
+    const label = document.createElement('div');
+    label.className = 'day-label';
+    label.textContent = g.label;
+    dayDiv.appendChild(label);
+
+    g.items.forEach(m => {
+      const card = document.createElement('div');
+      card.className = `mem-card ${m.role==='user'?'user':'assistant'}`;
+
+      const meta = document.createElement('div');
+      meta.className = 'mem-meta';
+      const roleEl = document.createElement('div');
+      roleEl.className = 'mem-role';
+      roleEl.innerHTML = `<span class="dot-role ${m.role==='user'?'user':'ai'}"></span>${m.role==='user'?'你':'他'}`;
+      const timeEl = document.createElement('div');
+      timeEl.className = 'mem-time';
+      timeEl.textContent = fmtTime(m.timestamp);
+      meta.appendChild(roleEl);
+      meta.appendChild(timeEl);
+
+      const text = document.createElement('div');
+      text.className = 'mem-text';
+      text.textContent = m.content;
+
+      // 超过3行显示展开按钮
+      card.appendChild(meta);
+      card.appendChild(text);
+
+      if (m.content.length > 80) {
+        text.classList.add('long');
+        const expBtn = document.createElement('span');
+        expBtn.className = 'expand-btn';
+        expBtn.textContent = '展开';
+        let expanded = false;
+        expBtn.addEventListener('click', () => {
+          expanded = !expanded;
+          text.classList.toggle('long', !expanded);
+          expBtn.textContent = expanded ? '收起' : '展开';
+        });
+        card.appendChild(expBtn);
+      }
+
+      dayDiv.appendChild(card);
+    });
+    area.appendChild(dayDiv);
+  });
+}
+
+function updateStats(msgs) {
+  const days = new Set(msgs.map(m=>dayKey(m.timestamp))).size;
+  document.getElementById('statTotal').textContent = msgs.length;
+  document.getElementById('statDays').textContent = days;
+  document.getElementById('statUser').textContent = msgs.filter(m=>m.role==='user').length;
+  document.getElementById('statAI').textContent = msgs.filter(m=>m.role==='assistant').length;
+}
+
+async function loadMemory() {
+  try {
+    const res = await fetch('/api/history?limit=500');
+    allMessages = await res.json();
+    updateStats(allMessages);
+    renderMessages(allMessages);
+  } catch(e) {
+    document.getElementById('emptyState').textContent = '加载失败，请检查后端连接。';
+  }
+}
+loadMemory();
+
+// 搜索
+document.getElementById('searchBox').addEventListener('input', function() {
+  const q = this.value.trim().toLowerCase();
+  if (!q) { renderMessages(allMessages); return; }
+  const filtered = allMessages.filter(m => m.content.toLowerCase().includes(q));
+  renderMessages(filtered);
+});
+
+// 清空
+document.getElementById('clearBtn').addEventListener('click', async () => {
+  if (!confirm('确认清空所有对话记录？')) return;
+  await fetch('/api/history', { method: 'DELETE' });
+  allMessages = [];
+  updateStats([]);
+  renderMessages([]);
+});
+</script>
+</body>
+</html>

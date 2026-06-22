@@ -139,7 +139,7 @@
     // 先看本地有没有保存过的 session
     const saved = localStorage.getItem('abyss_session_id');
     if (saved) {
-      sessionId = Number(saved);
+      sessionId = saved;
       return;
     }
     // 没有就创建新会话
@@ -147,7 +147,7 @@
       const res = await fetch(`${API_BASE}/sessions`, { method: 'POST' });
       const data = await res.json();
       sessionId = data.session_id;
-      localStorage.setItem('abyss_session_id', String(sessionId));
+      localStorage.setItem('abyss_session_id', sessionId);
     } catch (e) {
       appendMessage('ai', '无法连接服务器，请刷新重试。');
     }
@@ -229,7 +229,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: text,
-          session_id: sessionId,
+         session_id: String(sessionId),
         }),
       });
 

@@ -312,27 +312,44 @@ async function sendMessage() {
     }
 
     const data = await res.json();
+    console.log('后端返回:', JSON.stringify(data));
     hideTyping();
 
-    // 处理多段回复（segments）或单段回复（reply）
-    if (data.segments && Array.isArray(data.segments)) {
-      for (const seg of data.segments) {
-        appendBubble('assistant', seg, Date.now());
-        // 可选：模拟打字间隔
-        await new Promise(r => setTimeout(r, 600));
-      }
-      // 将完整回复存入 history（拼接或直接取segments）
-      const fullReply = data.segments.join('');
-      history.push({ role: 'assistant', content: fullReply });
-      totalOut += fullReply.length;
-    } else if (data.reply) {
-      const reply = data.reply;
-      appendBubble('assistant', reply, Date.now());
-      history.push({ role: 'assistant', content: reply });
-      totalOut += reply.length;
-    } else {
-      appendBubble('assistant', '出了点问题，请稍后再试。', Date.now());
+    // 辅助函数：从任意对象中尝试提取字符串
+    function extractText(segment) {
+        if (typeof segment === 'string') return segment;
+        if (segment && typeof segment === 'object') {
+        // 尝试常见字段
+            return segment.content || segment.text || segment.reply || segment.msg || JSON.stringify(segment);
+        }
+        return String(segment);
     }
+
+    // 1. 优先处理 segments 数组
+    if (data.segments && Array.isArray(data.segments)) {
+        for (const seg of data.segments) {
+            const text = extractText(seg);
+            appendBubble('assistant', text, Date.now());
+        // 可选：模拟打字间隔
+            await new Promise(r => setTimeout(r, 600));
+        }
+        // 将完整回复存入 history（拼接所有段的文本）
+        const fullReply = data.segments.map(extractText).join('');
+        history.push({ role: 'assistant', content: fullReply });
+        totalOut += fullReply.length;
+    }
+    // 2. 如果有 reply 字段
+    else if (data.reply !== undefined) {
+        const reply = extractText(data.reply);
+        appendBubble('assistant', reply, Date.now());
+        history.push({ role: 'assistant', content: reply });
+        totalOut += reply.length;
+    }
+    // 3. 如果啥也没有，兜底
+    else {
+        appendBubble('assistant', '出了点问题，请稍后再试。', Date.now());
+    }
+
 
     totalIn += text.length;
     document.getElementById('tokenInfo').textContent = `累计 输入 ${totalIn} · 输出 ${totalOut}`;

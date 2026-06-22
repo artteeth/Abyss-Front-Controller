@@ -251,7 +251,7 @@ function setThinking(on) {
 // ===== 加载历史记录 =====
 async function loadHistory() {
   try {
-    const res = await fetch(`${API_BASE}/api/history`);
+    const res = await fetch(`${API_BASE}/sessions/12/messages`);
     const data = await res.json();
     if (!data.length) return;
     data.forEach(m => {
@@ -280,7 +280,7 @@ async function sendMessage() {
   showTyping();
 
   try {
-    const res = await fetch(`${API_BASE}/api/chat`, {
+    const res = await fetch(`${API_BASE}/chat`, {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ messages: history })

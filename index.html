@@ -280,6 +280,17 @@ async function sendMessage() {
   showTyping();
 
   try {
+    // 🔑 发送前清洗：剥离 UI 字段、合并数组 content
+    function sanitize(history) {
+      return history
+        .filter(m => m && m.role && m.content != null)
+        .map(m => ({
+          role: m.role,
+          content: Array.isArray(m.content)
+            ? m.content.join('\n')
+            : String(m.content)
+        }));
+    }
     const res = await fetch(`${API_BASE}/chat`, {
       method: 'POST',
       headers: {'Content-Type':'application/json'},

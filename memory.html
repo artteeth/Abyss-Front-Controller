@@ -116,6 +116,8 @@ body { background: #e8e6e0; display: flex; justify-content: center; min-height: 
 
 <script>
 let allMessages = [];
+const API_BASE = 'https://abyss-backend-sqb2.onrender.com';
+const SESSION_ID = 12;   // 后端默认值
 
 function fmtDate(ts) {
   const d = new Date(ts);
@@ -209,8 +211,14 @@ function updateStats(msgs) {
 
 async function loadMemory() {
   try {
-    const res = await fetch('/api/history?limit=500');
-    allMessages = await res.json();
+    const res = await fetch(`${API_BASE}/sessions/${SESSION_ID}/messages`);
+    const data = await res.json();
+    // 后端返回的是 { messages: [...] }，每条有 created_at 字段
+    allMessages = (data.messages || []).map(m => ({
+       role: m.role,
+      content: m.content,
+      timestamp: new Date(m.created_at).getTime()
+    }));
     updateStats(allMessages);
     renderMessages(allMessages);
   } catch(e) {

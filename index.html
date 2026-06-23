@@ -422,6 +422,24 @@ document.getElementById('inputBox').addEventListener('input', function() {
   this.style.height = 'auto';
   this.style.height = Math.min(this.scrollHeight, 100)+'px';
 });
+  
+// ── 事件绑定 ──────────────────────────────────────────────
+document.getElementById('sendBtn').addEventListener('click', sendMessage);
+ 
+document.getElementById('inputBox').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+ 
+document.getElementById('inputBox').addEventListener('input', function () {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+});
+ 
+// ── 启动 ──────────────────────────────────────────────────
+initSession();
 </script>
 </body>
 </html>

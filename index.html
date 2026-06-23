@@ -18,7 +18,8 @@ body { background: #e8e6e0; display: flex; justify-content: center; min-height: 
 /* 顶栏 */
 .topbar { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px 10px; border-bottom: 0.5px solid #dddbd5; background: #f5f4f0; position: relative; z-index: 1; }
 .topbar-left { display: flex; align-items: center; gap: 10px; }
-.avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg,#b8cfe8,#8aafc8); display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 500; color: #2e5070; border: 1px solid #c8daea; flex-shrink: 0; }
+.avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg,#b8cfe8,#8aafc8); display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 500; color: #2e5070; border: 1px solid #c8daea; flex-shrink: 0; overflow: hidden; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 .ai-name { font-size: 14px; font-weight: 500; color: #3a3830; font-family: 'Noto Serif SC', serif; }
 .ai-status { font-size: 11px; color: #9a9890; display: flex; align-items: center; gap: 4px; }
 .dot { width: 6px; height: 6px; border-radius: 50%; background: #7aab8a; display: inline-block; transition: background 0.3s; }
@@ -40,9 +41,10 @@ body { background: #e8e6e0; display: flex; justify-content: center; min-height: 
 
 .msg-row { display: flex; align-items: flex-end; animation: fadeUp 0.22s ease; }
 .msg-row.me { flex-direction: row-reverse; }
+.msg-row.no-anim { animation: none; }
 @keyframes fadeUp { from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)} }
 
-.bubble { max-width: 240px; padding: 10px 14px; font-size: 13.5px; line-height: 1.65; color: #3a3830; word-break: break-word; }
+.bubble { max-width: 240px; padding: 10px 14px; font-size: 13.5px; line-height: 1.65; color: #3a3830; word-break: break-word; white-space: pre-wrap; }
 .bubble.ai { background: #fff; border: 0.5px solid #dddbd5; border-radius: 18px 18px 18px 4px; }
 .bubble.me { background: #c8d8ea; border: 0.5px solid #b0c8de; border-radius: 18px 18px 4px 18px; color: #1e3a50; }
 .bubble.ai.quote { border-left: 2.5px solid #8aafc8; padding-left: 12px; background: #f0eee9; border-radius: 4px 14px 14px 4px; }
@@ -76,8 +78,7 @@ body { background: #e8e6e0; display: flex; justify-content: center; min-height: 
   <div class="status-bar">
     <span id="timeDisplay">--</span>
     <div class="battery-wrap">
-      <svg id="wifiIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9a9890" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1" fill="#9a9890"/></svg>
-      <!-- 电池图标：动态填充 -->
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9a9890" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1" fill="#9a9890"/></svg>
       <svg id="batteryIcon" width="22" height="13" viewBox="0 0 22 13" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect x="0.5" y="0.5" width="18" height="12" rx="2" stroke="#9a9890" stroke-width="1"/>
         <path d="M19.5 4v5" stroke="#9a9890" stroke-width="1.5" stroke-linecap="round"/>
@@ -90,29 +91,26 @@ body { background: #e8e6e0; display: flex; justify-content: center; min-height: 
   <!-- 顶栏 -->
   <div class="topbar">
     <div class="topbar-left">
-      <div class="avatar"> 
-        <img src="/avatar.png" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+      <div class="avatar">
+        <img src="/avatar.png" alt="" onerror="this.style.display='none'">
       </div>
       <div>
         <div class="ai-name">Abyss</div>
         <div class="ai-status">
           <span class="dot" id="statusDot"></span>
-          <span id="statusText">在线</span>
+          <span id="statusText">连接中…</span>
         </div>
       </div>
     </div>
     <div class="topbar-icons">
-      <!-- 书签 -->
       <button class="icon-btn" title="书签">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a8880" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
       </button>
-      <!-- 四角星（记忆） -->
       <button class="icon-btn" title="记忆" onclick="location.href='/memory'">
         <svg width="17" height="17" viewBox="0 0 16 16" fill="none">
           <path d="M8 1 L9.1 6.3 L14.5 8 L9.1 9.7 L8 15 L6.9 9.7 L1.5 8 L6.9 6.3 Z" stroke="#8a8880" stroke-width="1.2" stroke-linejoin="round" fill="none"/>
         </svg>
       </button>
-      <!-- 宫格 -->
       <button class="icon-btn" title="菜单">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#8a8880" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
       </button>
@@ -142,36 +140,32 @@ body { background: #e8e6e0; display: flex; justify-content: center; min-height: 
 
 <script>
 const API_BASE = 'https://abyss-backend-sqb2.onrender.com';
-const SESSION_ID = 12;   // 后端默认值
-  
-// ===== 工具函数 =====
+
+// ── 工具函数 ──────────────────────────────────────────────
 function fmtTime(ts) {
   const d = new Date(ts);
-  const h = String(d.getHours()).padStart(2,'0');
-  const m = String(d.getMinutes()).padStart(2,'0');
-  return `${h}:${m}`;
+  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 }
 function fmtDate(ts) {
   const d = new Date(ts);
   const now = new Date();
   const isToday = d.toDateString() === now.toDateString();
-  const mo = d.getMonth()+1, day = d.getDate();
-  const period = d.getHours()<6?'深夜':d.getHours()<12?'上午':d.getHours()<18?'下午':'晚上';
+  const mo = d.getMonth() + 1, day = d.getDate();
   return isToday ? `今天 · ${fmtTime(ts)}` : `${mo}月${day}日 · ${fmtTime(ts)}`;
 }
 
-// ===== 状态栏时间 =====
+// ── 状态栏时间 ────────────────────────────────────────────
 function updateStatusTime() {
   const now = new Date();
-  const h = now.getHours(), mo = now.getMonth()+1, d = now.getDate();
-  const period = h<6?'深夜':h<12?'上午':h<18?'下午':'晚上';
-  const mm = String(now.getMinutes()).padStart(2,'0');
+  const h = now.getHours(), mo = now.getMonth() + 1, d = now.getDate();
+  const period = h < 6 ? '深夜' : h < 12 ? '上午' : h < 18 ? '下午' : '晚上';
+  const mm = String(now.getMinutes()).padStart(2, '0');
   document.getElementById('timeDisplay').textContent = `${period} ${h}:${mm} · ${mo}月${d}日`;
 }
 updateStatusTime();
 setInterval(updateStatusTime, 30000);
 
-// ===== 电池同步 =====
+// ── 电池 ─────────────────────────────────────────────────
 async function updateBattery() {
   if (!navigator.getBattery) return;
   try {
@@ -192,10 +186,9 @@ async function updateBattery() {
 }
 updateBattery();
 
-// ===== 对话历史 & 时间戳逻辑 =====
-const IDLE_MS = 10 * 60 * 1000; // 10分钟
-let history = [];       // 发给后端的 messages
-let lastMsgTime = 0;    // 上一条消息的时间戳
+// ── 对话状态 ──────────────────────────────────────────────
+const IDLE_MS = 10 * 60 * 1000;
+let lastMsgTime = 0;
 let totalIn = 0, totalOut = 0;
 
 function needsDateTag(ts) {
@@ -203,27 +196,32 @@ function needsDateTag(ts) {
   return (ts - lastMsgTime) >= IDLE_MS;
 }
 
-function appendDateTag(ts) {
+// ── 渲染：日期标签 ────────────────────────────────────────
+function appendDateTag(ts, noAnim) {
   const el = document.createElement('div');
   el.className = 'date-tag';
   el.textContent = fmtDate(ts);
   document.getElementById('chatArea').appendChild(el);
 }
 
-function appendBubble(role, text, ts) {
+// ── 渲染：气泡（新消息） ──────────────────────────────────
+function appendBubble(role, text, ts, noAnim) {
   const now = ts || Date.now();
   if (needsDateTag(now)) appendDateTag(now);
   lastMsgTime = now;
 
   const row = document.createElement('div');
-  row.className = `msg-row${role==='user'?' me':''}`;
+  row.className = `msg-row${role === 'user' ? ' me' : ''}${noAnim ? ' no-anim' : ''}`;
+
   const inner = document.createElement('div');
   const bubble = document.createElement('div');
-  bubble.className = `bubble ${role==='user'?'me':'ai'}`;
+  bubble.className = `bubble ${role === 'user' ? 'me' : 'ai'}`;
   bubble.textContent = text;
+
   const actions = document.createElement('div');
-  actions.className = `msg-actions ${role==='user'?'right':'left'}`;
+  actions.className = `msg-actions ${role === 'user' ? 'right' : 'left'}`;
   actions.textContent = '引用';
+
   inner.appendChild(bubble);
   inner.appendChild(actions);
   row.appendChild(inner);
@@ -231,9 +229,11 @@ function appendBubble(role, text, ts) {
   document.getElementById('chatArea').scrollTop = 99999;
 }
 
+// ── 打字动画 ──────────────────────────────────────────────
 function showTyping() {
   const row = document.createElement('div');
-  row.className = 'msg-row'; row.id = 'typingRow';
+  row.className = 'msg-row';
+  row.id = 'typingRow';
   const tb = document.createElement('div');
   tb.className = 'typing-bubble';
   tb.innerHTML = '<span></span><span></span><span></span>';
@@ -246,6 +246,7 @@ function hideTyping() {
   if (el) el.remove();
 }
 
+// ── 状态切换 ──────────────────────────────────────────────
 function setThinking(on) {
   document.getElementById('statusDot').className = on ? 'dot thinking' : 'dot';
   document.getElementById('statusText').textContent = on ? '思考中…' : '在线';
@@ -254,7 +255,7 @@ function setThinking(on) {
 
 // ── Session 管理 ──────────────────────────────────────────
 let sessionId = null;
- 
+
 async function initSession() {
   const saved = localStorage.getItem('abyss_session_id');
   if (saved) {
@@ -262,122 +263,96 @@ async function initSession() {
   } else {
     try {
       const res = await fetch(`${API_BASE}/sessions`, { method: 'POST' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       sessionId = data.session_id;
       localStorage.setItem('abyss_session_id', String(sessionId));
-    } catch (e) {
-      appendMessage('ai', '无法连接服务器，请刷新重试。');
+    } catch(e) {
+      document.getElementById('statusText').textContent = '连接失败';
+      appendBubble('ai', '无法连接服务器，请刷新重试。', Date.now());
       return;
     }
   }
+  // session 就绪后加载历史
   await loadHistory();
+  document.getElementById('statusText').textContent = '在线';
 }
-  
-// ===== 加载历史记录 =====
+
+// ── 加载历史消息 ──────────────────────────────────────────
 async function loadHistory() {
   try {
     const res = await fetch(`${API_BASE}/sessions/${sessionId}/messages`);
     if (!res.ok) return;
     const data = await res.json();
     const msgs = data.messages || [];
- 
+
     const chatArea = document.getElementById('chatArea');
     chatArea.innerHTML = '';
- 
+    lastMsgTime = 0; // 重置，让历史消息自己算时间标签
+
     if (msgs.length === 0) {
-      // 没有历史，显示当前时间标签
-      const now = new Date();
-      const h = String(now.getHours()).padStart(2, '0');
-      const m = String(now.getMinutes()).padStart(2, '0');
-      const tag = document.createElement('div');
-      tag.className = 'date-tag';
-      tag.textContent = `今天 · ${h}:${m}`;
-      chatArea.appendChild(tag);
+      appendDateTag(Date.now());
       return;
     }
 
-    // 按日期分组，插入日期分隔线
-    let lastDateStr = '';
     msgs.forEach(msg => {
       if (msg.role === 'tool') return;
- 
-      const msgDate = new Date(msg.created_at);
-      const today = new Date();
-      const isToday = msgDate.toDateString() === today.toDateString();
-      const mo = msgDate.getMonth() + 1;
-      const d = msgDate.getDate();
-      const h = String(msgDate.getHours()).padStart(2, '0');
-      const m = String(msgDate.getMinutes()).padStart(2, '0');
-      const dateStr = `${mo}/${d}`;
- 
-      if (dateStr !== lastDateStr) {
-        const tag = document.createElement('div');
-        tag.className = 'date-tag';
-        tag.textContent = isToday ? `今天 · ${h}:${m}` : `${mo}月${d}日 · ${h}:${m}`;
-        chatArea.appendChild(tag);
-        lastDateStr = dateStr;
-      }
- 
+      const ts = new Date(msg.created_at).getTime();
+
+      // 历史消息用 needsDateTag 判断是否插入日期分隔
+      if (needsDateTag(ts)) appendDateTag(ts);
+      lastMsgTime = ts;
+
       const row = document.createElement('div');
       row.className = `msg-row${msg.role === 'user' ? ' me' : ''} no-anim`;
- 
+
       const bubble = document.createElement('div');
       bubble.className = `bubble ${msg.role === 'user' ? 'me' : 'ai'}`;
       bubble.textContent = msg.content;
- 
+
       const actions = document.createElement('div');
       actions.className = `msg-actions ${msg.role === 'user' ? 'right' : 'left'}`;
       actions.textContent = '引用';
- 
+
       const wrap = document.createElement('div');
       wrap.appendChild(bubble);
       wrap.appendChild(actions);
       row.appendChild(wrap);
       chatArea.appendChild(row);
     });
- 
+
     chatArea.scrollTop = chatArea.scrollHeight;
-  } catch (e) {
+  } catch(e) {
     console.error('加载历史失败:', e);
   }
 }
 
-// ===== 清洗函数：确保每条消息的 content 为字符串 =====
-function sanitize(msgs) {
-  return msgs
-    .filter(m => m && m.role && m.content != null)
-    .map(m => ({
-      role: m.role,
-      content: Array.isArray(m.content) ? m.content.join('\n') : String(m.content)
-    }));
-}
-
-// ===== 发送消息 =====
+// ── 发送消息 ──────────────────────────────────────────────
 async function sendMessage() {
+  if (!sessionId) {
+    appendBubble('ai', '还在连接服务器，请稍候再试…', Date.now());
+    return;
+  }
+
   const input = document.getElementById('inputBox');
   const text = input.value.trim();
   if (!text) return;
+
   input.value = '';
   input.style.height = 'auto';
 
-  const sendTime = Date.now();
-  history.push({ role: 'user', content: text });
-  appendBubble('user', text, sendTime);
+  appendBubble('user', text, Date.now());
   setThinking(true);
   showTyping();
-
-  // 清洗历史，确保每条都是字符串
-  const cleanHistory = sanitize(history);
-  console.log('发送的 messages:', cleanHistory); // 调试用
 
   try {
     const res = await fetch(`${API_BASE}/chat`, {
       method: 'POST',
-      headers: {'Content-Type':'application/json'},
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        messages: cleanHistory,
-        session_id: SESSION_ID   // 可选，后端默认为 "default"
-      })
+        message: text,
+        session_id: sessionId,
+      }),
     });
 
     if (!res.ok) {
@@ -386,63 +361,37 @@ async function sendMessage() {
     }
 
     const data = await res.json();
-    console.log('后端返回:', JSON.stringify(data));
     hideTyping();
 
-    // 辅助函数：从任意对象中尝试提取字符串
-    function extractText(segment) {
-        if (typeof segment === 'string') return segment;
-        if (segment && typeof segment === 'object') {
-        // 尝试常见字段
-            return segment.content || segment.text || segment.reply || segment.msg || JSON.stringify(segment);
-        }
-        return String(segment);
-    }
-
-    // 1. 优先处理 segments 数组
-    if (data.segments && Array.isArray(data.segments)) {
-        for (const seg of data.segments) {
-            const text = extractText(seg);
-            appendBubble('assistant', text, Date.now());
-        // 可选：模拟打字间隔
-            await new Promise(r => setTimeout(r, 600));
-        }
-        // 将完整回复存入 history（拼接所有段的文本）
-        const fullReply = data.segments.map(extractText).join('');
-        history.push({ role: 'assistant', content: fullReply });
-        totalOut += fullReply.length;
-    }
-    // 2. 如果有 reply 字段
-    else if (data.reply !== undefined) {
-        const reply = extractText(data.reply);
-        appendBubble('assistant', reply, Date.now());
-        history.push({ role: 'assistant', content: reply });
-        totalOut += reply.length;
-    }
-    // 3. 如果啥也没有，兜底
-    else {
-        appendBubble('assistant', '出了点问题，请稍后再试。', Date.now());
-    }
-
+    const reply = data.reply || '……';
+    appendBubble('assistant', reply, Date.now());
 
     totalIn += text.length;
-    document.getElementById('tokenInfo').textContent = `累计 输入 ${totalIn} · 输出 ${totalOut}`;
+    totalOut += reply.length;
+    document.getElementById('tokenInfo').textContent =
+      `累计 输入 ${totalIn} · 输出 ${totalOut}`;
+
   } catch(e) {
     hideTyping();
     console.error(e);
-    appendBubble('assistant', `网络错误，请检查后端连接。`, Date.now());
+    appendBubble('assistant', '网络错误，请检查连接后重试。', Date.now());
   }
+
   setThinking(false);
 }
 
+// ── 事件绑定 ──────────────────────────────────────────────
 document.getElementById('sendBtn').addEventListener('click', sendMessage);
 document.getElementById('inputBox').addEventListener('keydown', e => {
-  if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
 });
 document.getElementById('inputBox').addEventListener('input', function() {
   this.style.height = 'auto';
-  this.style.height = Math.min(this.scrollHeight, 100)+'px';
+  this.style.height = Math.min(this.scrollHeight, 100) + 'px';
 });
+
+// ── 启动 ──────────────────────────────────────────────────
+initSession();
 </script>
 </body>
 </html>

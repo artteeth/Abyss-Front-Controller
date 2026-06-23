@@ -275,51 +275,51 @@ async function loadHistory() {
       return;
     }
 
-     // 按日期分组，插入日期分隔线
-      let lastDateStr = '';
-      msgs.forEach(msg => {
-        if (msg.role === 'tool') return;
+    // 按日期分组，插入日期分隔线
+    let lastDateStr = '';
+    msgs.forEach(msg => {
+      if (msg.role === 'tool') return;
  
-        const msgDate = new Date(msg.created_at);
-        const today = new Date();
-        const isToday = msgDate.toDateString() === today.toDateString();
-        const mo = msgDate.getMonth() + 1;
-        const d = msgDate.getDate();
-        const h = String(msgDate.getHours()).padStart(2, '0');
-        const m = String(msgDate.getMinutes()).padStart(2, '0');
-        const dateStr = `${mo}/${d}`;
+      const msgDate = new Date(msg.created_at);
+      const today = new Date();
+      const isToday = msgDate.toDateString() === today.toDateString();
+      const mo = msgDate.getMonth() + 1;
+      const d = msgDate.getDate();
+      const h = String(msgDate.getHours()).padStart(2, '0');
+      const m = String(msgDate.getMinutes()).padStart(2, '0');
+      const dateStr = `${mo}/${d}`;
  
-        if (dateStr !== lastDateStr) {
-          const tag = document.createElement('div');
-          tag.className = 'date-tag';
-          tag.textContent = isToday ? `今天 · ${h}:${m}` : `${mo}月${d}日 · ${h}:${m}`;
-          chatArea.appendChild(tag);
-          lastDateStr = dateStr;
-        }
+      if (dateStr !== lastDateStr) {
+        const tag = document.createElement('div');
+        tag.className = 'date-tag';
+        tag.textContent = isToday ? `今天 · ${h}:${m}` : `${mo}月${d}日 · ${h}:${m}`;
+        chatArea.appendChild(tag);
+        lastDateStr = dateStr;
+      }
  
-        const row = document.createElement('div');
-        row.className = `msg-row${msg.role === 'user' ? ' me' : ''} no-anim`;
+      const row = document.createElement('div');
+      row.className = `msg-row${msg.role === 'user' ? ' me' : ''} no-anim`;
  
-        const bubble = document.createElement('div');
-        bubble.className = `bubble ${msg.role === 'user' ? 'me' : 'ai'}`;
-        bubble.textContent = msg.content;
+      const bubble = document.createElement('div');
+      bubble.className = `bubble ${msg.role === 'user' ? 'me' : 'ai'}`;
+      bubble.textContent = msg.content;
  
-        const actions = document.createElement('div');
-        actions.className = `msg-actions ${msg.role === 'user' ? 'right' : 'left'}`;
-        actions.textContent = '引用';
+      const actions = document.createElement('div');
+      actions.className = `msg-actions ${msg.role === 'user' ? 'right' : 'left'}`;
+      actions.textContent = '引用';
  
-        const wrap = document.createElement('div');
-        wrap.appendChild(bubble);
-        wrap.appendChild(actions);
-        row.appendChild(wrap);
-        chatArea.appendChild(row);
-      });
+      const wrap = document.createElement('div');
+      wrap.appendChild(bubble);
+      wrap.appendChild(actions);
+      row.appendChild(wrap);
+      chatArea.appendChild(row);
+    });
  
-      chatArea.scrollTop = chatArea.scrollHeight;
-    } catch (e) {
-      console.error('加载历史失败:', e);
-    }
+    chatArea.scrollTop = chatArea.scrollHeight;
+  } catch (e) {
+    console.error('加载历史失败:', e);
   }
+}
 
 // ===== 清洗函数：确保每条消息的 content 为字符串 =====
 function sanitize(msgs) {

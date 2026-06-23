@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/memory", "destination": "/memory.html" }
+  ]
+}

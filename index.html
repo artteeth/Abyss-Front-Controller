@@ -255,7 +255,7 @@ function setThinking(on) {
 // ===== 加载历史记录 =====
 async function loadHistory() {
   try {
-    const res = await fetch(`${API_BASE}/sessions/${sessionId}/messages`);
+    const res = await fetch(`${API_BASE}/sessions/${SESSION_ID}/messages`);
     if (!res.ok) return;
     const data = await res.json();
     const msgs = data.messages || [];

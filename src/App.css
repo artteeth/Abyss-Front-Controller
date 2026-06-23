@@ -62,13 +62,7 @@ body {
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #b8cfe8, #8aafc8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 15px;
-  font-weight: 500;
-  color: #2e5070;
+  overflow: hidden;
   border: 1px solid #c8daea;
   flex-shrink: 0;
 }

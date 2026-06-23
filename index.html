@@ -255,20 +255,71 @@ function setThinking(on) {
 // ===== 加载历史记录 =====
 async function loadHistory() {
   try {
-    const res = await fetch(`${API_BASE}/sessions/${SESSION_ID}/messages`);
+    const res = await fetch(`${API_BASE}/sessions/${sessionId}/messages`);
     if (!res.ok) return;
     const data = await res.json();
-    if (!data.length) return;
-    data.forEach(m => {
-      appendBubble(m.role, m.content, m.timestamp);
-      history.push({ role: m.role, content: m.content });
-    });
-    totalIn = data.filter(m=>m.role==='user').reduce((a,m)=>a+m.content.length,0);
-    totalOut = data.filter(m=>m.role==='assistant').reduce((a,m)=>a+m.content.length,0);
-    document.getElementById('tokenInfo').textContent = `累计 输入 ${totalIn} · 输出 ${totalOut}`;
-  } catch(e) {}
-}
-loadHistory();
+    const msgs = data.messages || [];
+ 
+    const chatArea = document.getElementById('chatArea');
+    chatArea.innerHTML = '';
+ 
+    if (msgs.length === 0) {
+      // 没有历史，显示当前时间标签
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2, '0');
+      const m = String(now.getMinutes()).padStart(2, '0');
+      const tag = document.createElement('div');
+      tag.className = 'date-tag';
+      tag.textContent = `今天 · ${h}:${m}`;
+      chatArea.appendChild(tag);
+      return;
+    }
+
+     // 按日期分组，插入日期分隔线
+      let lastDateStr = '';
+      msgs.forEach(msg => {
+        if (msg.role === 'tool') return;
+ 
+        const msgDate = new Date(msg.created_at);
+        const today = new Date();
+        const isToday = msgDate.toDateString() === today.toDateString();
+        const mo = msgDate.getMonth() + 1;
+        const d = msgDate.getDate();
+        const h = String(msgDate.getHours()).padStart(2, '0');
+        const m = String(msgDate.getMinutes()).padStart(2, '0');
+        const dateStr = `${mo}/${d}`;
+ 
+        if (dateStr !== lastDateStr) {
+          const tag = document.createElement('div');
+          tag.className = 'date-tag';
+          tag.textContent = isToday ? `今天 · ${h}:${m}` : `${mo}月${d}日 · ${h}:${m}`;
+          chatArea.appendChild(tag);
+          lastDateStr = dateStr;
+        }
+ 
+        const row = document.createElement('div');
+        row.className = `msg-row${msg.role === 'user' ? ' me' : ''} no-anim`;
+ 
+        const bubble = document.createElement('div');
+        bubble.className = `bubble ${msg.role === 'user' ? 'me' : 'ai'}`;
+        bubble.textContent = msg.content;
+ 
+        const actions = document.createElement('div');
+        actions.className = `msg-actions ${msg.role === 'user' ? 'right' : 'left'}`;
+        actions.textContent = '引用';
+ 
+        const wrap = document.createElement('div');
+        wrap.appendChild(bubble);
+        wrap.appendChild(actions);
+        row.appendChild(wrap);
+        chatArea.appendChild(row);
+      });
+ 
+      chatArea.scrollTop = chatArea.scrollHeight;
+    } catch (e) {
+      console.error('加载历史失败:', e);
+    }
+  }
 
 // ===== 清洗函数：确保每条消息的 content 为字符串 =====
 function sanitize(msgs) {

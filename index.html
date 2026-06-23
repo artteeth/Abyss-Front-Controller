@@ -141,32 +141,35 @@ body { background: #e8e6e0; display: flex; justify-content: center; min-height: 
 <script>
 const API_BASE = 'https://abyss-backend-sqb2.onrender.com';
 const SESSION_ID = 12;   // 后端默认值
-
-// ── 工具函数 ──────────────────────────────────────────────
+  
+// ===== 工具函数 =====
 function fmtTime(ts) {
   const d = new Date(ts);
-  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  const h = String(d.getHours()).padStart(2,'0');
+  const m = String(d.getMinutes()).padStart(2,'0');
+  return `${h}:${m}`;
 }
 function fmtDate(ts) {
   const d = new Date(ts);
   const now = new Date();
   const isToday = d.toDateString() === now.toDateString();
-  const mo = d.getMonth() + 1, day = d.getDate();
+  const mo = d.getMonth()+1, day = d.getDate();
+  const period = d.getHours()<6?'深夜':d.getHours()<12?'上午':d.getHours()<18?'下午':'晚上';
   return isToday ? `今天 · ${fmtTime(ts)}` : `${mo}月${day}日 · ${fmtTime(ts)}`;
 }
 
-// ── 状态栏时间 ────────────────────────────────────────────
+// ===== 状态栏时间 =====
 function updateStatusTime() {
   const now = new Date();
-  const h = now.getHours(), mo = now.getMonth() + 1, d = now.getDate();
-  const period = h < 6 ? '深夜' : h < 12 ? '上午' : h < 18 ? '下午' : '晚上';
-  const mm = String(now.getMinutes()).padStart(2, '0');
+  const h = now.getHours(), mo = now.getMonth()+1, d = now.getDate();
+  const period = h<6?'深夜':h<12?'上午':h<18?'下午':'晚上';
+  const mm = String(now.getMinutes()).padStart(2,'0');
   document.getElementById('timeDisplay').textContent = `${period} ${h}:${mm} · ${mo}月${d}日`;
 }
 updateStatusTime();
 setInterval(updateStatusTime, 30000);
 
-// ── 电池 ─────────────────────────────────────────────────
+// ===== 电池同步 =====
 async function updateBattery() {
   if (!navigator.getBattery) return;
   try {
@@ -187,9 +190,10 @@ async function updateBattery() {
 }
 updateBattery();
 
-// ── 对话状态 ──────────────────────────────────────────────
-const IDLE_MS = 10 * 60 * 1000;
-let lastMsgTime = 0;
+// ===== 对话历史 & 时间戳逻辑 =====
+const IDLE_MS = 10 * 60 * 1000; // 10分钟
+let history = [];       // 发给后端的 messages
+let lastMsgTime = 0;    // 上一条消息的时间戳
 let totalIn = 0, totalOut = 0;
 
 function needsDateTag(ts) {
@@ -197,32 +201,27 @@ function needsDateTag(ts) {
   return (ts - lastMsgTime) >= IDLE_MS;
 }
 
-// ── 渲染：日期标签 ────────────────────────────────────────
-function appendDateTag(ts, noAnim) {
+function appendDateTag(ts) {
   const el = document.createElement('div');
   el.className = 'date-tag';
   el.textContent = fmtDate(ts);
   document.getElementById('chatArea').appendChild(el);
 }
 
-// ── 渲染：气泡（新消息） ──────────────────────────────────
-function appendBubble(role, text, ts, noAnim) {
+function appendBubble(role, text, ts) {
   const now = ts || Date.now();
   if (needsDateTag(now)) appendDateTag(now);
   lastMsgTime = now;
 
   const row = document.createElement('div');
-  row.className = `msg-row${role === 'user' ? ' me' : ''}${noAnim ? ' no-anim' : ''}`;
-
+  row.className = `msg-row${role==='user'?' me':''}`;
   const inner = document.createElement('div');
   const bubble = document.createElement('div');
-  bubble.className = `bubble ${role === 'user' ? 'me' : 'ai'}`;
+  bubble.className = `bubble ${role==='user'?'me':'ai'}`;
   bubble.textContent = text;
-
   const actions = document.createElement('div');
-  actions.className = `msg-actions ${role === 'user' ? 'right' : 'left'}`;
+  actions.className = `msg-actions ${role==='user'?'right':'left'}`;
   actions.textContent = '引用';
-
   inner.appendChild(bubble);
   inner.appendChild(actions);
   row.appendChild(inner);
@@ -230,11 +229,9 @@ function appendBubble(role, text, ts, noAnim) {
   document.getElementById('chatArea').scrollTop = 99999;
 }
 
-// ── 打字动画 ──────────────────────────────────────────────
 function showTyping() {
   const row = document.createElement('div');
-  row.className = 'msg-row';
-  row.id = 'typingRow';
+  row.className = 'msg-row'; row.id = 'typingRow';
   const tb = document.createElement('div');
   tb.className = 'typing-bubble';
   tb.innerHTML = '<span></span><span></span><span></span>';
@@ -247,73 +244,41 @@ function hideTyping() {
   if (el) el.remove();
 }
 
-// ── 状态切换 ──────────────────────────────────────────────
 function setThinking(on) {
   document.getElementById('statusDot').className = on ? 'dot thinking' : 'dot';
   document.getElementById('statusText').textContent = on ? '思考中…' : '在线';
   document.getElementById('sendBtn').disabled = on;
 }
 
-// ── Session 管理 ──────────────────────────────────────────
-let sessionId = null;
-
-async function initSession() {
-  const urlSid = new URLSearchParams(location.search).get('sid');
-  sessionId = urlSid ? Number(urlSid) : 12;
-  await loadHistory();
-  document.getElementById('statusText').textContent = '在线';
-}
-
-// ── 加载历史消息 ──────────────────────────────────────────
+// ===== 加载历史记录 =====
 async function loadHistory() {
   try {
-    const res = await fetch(`${API_BASE}/sessions/${sessionId}/messages`);
+    const res = await fetch(`${API_BASE}/sessions/${SESSION_ID}/messages`);
     if (!res.ok) return;
     const data = await res.json();
-    const msgs = data.messages || [];
-
-    const chatArea = document.getElementById('chatArea');
-    chatArea.innerHTML = '';
-    lastMsgTime = 0; // 重置，让历史消息自己算时间标签
-
-    if (msgs.length === 0) {
-      appendDateTag(Date.now());
-      return;
-    }
-
-    msgs.forEach(msg => {
-      if (msg.role === 'tool') return;
-      const ts = new Date(msg.created_at).getTime();
-
-      // 历史消息用 needsDateTag 判断是否插入日期分隔
-      if (needsDateTag(ts)) appendDateTag(ts);
-      lastMsgTime = ts;
-
-      const row = document.createElement('div');
-      row.className = `msg-row${msg.role === 'user' ? ' me' : ''} no-anim`;
-
-      const bubble = document.createElement('div');
-      bubble.className = `bubble ${msg.role === 'user' ? 'me' : 'ai'}`;
-      bubble.textContent = msg.content;
-
-      const actions = document.createElement('div');
-      actions.className = `msg-actions ${msg.role === 'user' ? 'right' : 'left'}`;
-      actions.textContent = '引用';
-
-      const wrap = document.createElement('div');
-      wrap.appendChild(bubble);
-      wrap.appendChild(actions);
-      row.appendChild(wrap);
-      chatArea.appendChild(row);
+    if (!data.length) return;
+    data.forEach(m => {
+      appendBubble(m.role, m.content, m.timestamp);
+      history.push({ role: m.role, content: m.content });
     });
+    totalIn = data.filter(m=>m.role==='user').reduce((a,m)=>a+m.content.length,0);
+    totalOut = data.filter(m=>m.role==='assistant').reduce((a,m)=>a+m.content.length,0);
+    document.getElementById('tokenInfo').textContent = `累计 输入 ${totalIn} · 输出 ${totalOut}`;
+  } catch(e) {}
+}
+loadHistory();
 
-    chatArea.scrollTop = chatArea.scrollHeight;
-  } catch(e) {
-    console.error('加载历史失败:', e);
-  }
+// ===== 清洗函数：确保每条消息的 content 为字符串 =====
+function sanitize(msgs) {
+  return msgs
+    .filter(m => m && m.role && m.content != null)
+    .map(m => ({
+      role: m.role,
+      content: Array.isArray(m.content) ? m.content.join('\n') : String(m.content)
+    }));
 }
 
-// ── 发送消息 ──────────────────────────────────────────────
+// ===== 发送消息 =====
 async function sendMessage() {
   const input = document.getElementById('inputBox');
   const text = input.value.trim();
@@ -396,18 +361,14 @@ async function sendMessage() {
   setThinking(false);
 }
 
-// ── 事件绑定 ──────────────────────────────────────────────
 document.getElementById('sendBtn').addEventListener('click', sendMessage);
 document.getElementById('inputBox').addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
 });
 document.getElementById('inputBox').addEventListener('input', function() {
   this.style.height = 'auto';
-  this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+  this.style.height = Math.min(this.scrollHeight, 100)+'px';
 });
-
-// ── 启动 ──────────────────────────────────────────────────
-initSession();
 </script>
 </body>
 </html>

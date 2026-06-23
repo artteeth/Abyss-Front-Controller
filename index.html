@@ -257,23 +257,8 @@ function setThinking(on) {
 let sessionId = null;
 
 async function initSession() {
-  const saved = localStorage.getItem('abyss_session_id');
-  if (saved) {
-    sessionId = Number(saved);
-  } else {
-    try {
-      const res = await fetch(`${API_BASE}/sessions`, { method: 'POST' });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      sessionId = data.session_id;
-      localStorage.setItem('abyss_session_id', String(sessionId));
-    } catch(e) {
-      document.getElementById('statusText').textContent = '连接失败';
-      appendBubble('ai', '无法连接服务器，请刷新重试。', Date.now());
-      return;
-    }
-  }
-  // session 就绪后加载历史
+  const urlSid = new URLSearchParams(location.search).get('sid');
+  sessionId = urlSid ? Number(urlSid) : 12;
   await loadHistory();
   document.getElementById('statusText').textContent = '在线';
 }

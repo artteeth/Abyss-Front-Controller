@@ -145,9 +145,14 @@ setInterval(updateStatusTime, 30000);
 
 // ===== 电池同步 =====
 async function updateBattery() {
-  if (!navigator.getBattery) return;
+  if (!navigator.getBattery) {
+    console.log('电池 API 不支持');
+    document.getElementById('batteryPct').textContent = '';
+    return;
+  }
   try {
     const bat = await navigator.getBattery();
+    console.log('电池电量:', bat.level);
     function render() {
       const pct = Math.round(bat.level * 100);
       const w = Math.round((pct / 100) * 14);
@@ -160,7 +165,10 @@ async function updateBattery() {
     render();
     bat.addEventListener('levelchange', render);
     bat.addEventListener('chargingchange', render);
-  } catch(e) {}
+  } catch(e) {
+    console.log('电池获取失败:', e);
+    document.getElementById('batteryPct').textContent = '';
+  }
 }
 updateBattery();
 

@@ -236,9 +236,9 @@ document.getElementById('searchBox').addEventListener('input', function() {
 });
 
 // 清空
-document.getElementById('clearBtn').addEventListener('click', async () => {
-  if (!confirm('确认清空所有对话记录？')) return;
-  await fetch('/api/history', { method: 'DELETE' });
+document.getElementById('clearBtn').addEventListener('click', () => {
+  alert('如需清空请在 Supabase 手动删除记录');
+  });
   allMessages = [];
   updateStats([]);
   renderMessages([]);
